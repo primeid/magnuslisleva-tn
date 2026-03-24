@@ -41,12 +41,10 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </ul>
 
       <details open={isTexts} class="folder" data-folder-id="texts">
-        <summary>
-          <button class="directory-link folder-toggle" type="button">
-            <span class="folder-caret" aria-hidden="true"></span>
-            <span class="directory-icon">DIR</span>
-            <strong>Texts</strong>
-          </button>
+        <summary class="directory-link folder-toggle">
+          <span class="folder-caret" aria-hidden="true"></span>
+          <span class="directory-icon">DIR</span>
+          <strong>Texts</strong>
         </summary>
         <ol>
           <li>
@@ -72,12 +70,10 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </details>
 
       <details open={isCreations} class="folder" data-folder-id="creations">
-        <summary>
-          <button class="directory-link folder-toggle" type="button">
-            <span class="folder-caret" aria-hidden="true"></span>
-            <span class="directory-icon">DIR</span>
-            <strong>Creations</strong>
-          </button>
+        <summary class="directory-link folder-toggle">
+          <span class="folder-caret" aria-hidden="true"></span>
+          <span class="directory-icon">DIR</span>
+          <strong>Creations</strong>
         </summary>
         <ol>
           <li>

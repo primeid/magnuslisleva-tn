@@ -13,7 +13,6 @@ const { title, description = siteConfig.description, fileLabel } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
 const pathname = Astro.url.pathname;
 const label = fileLabel ?? title ?? "README";
-const buildDate = new Date();
 ---
 
 <!doctype html>
@@ -58,8 +57,9 @@ const buildDate = new Date();
         </div>
         <footer class="file-footer">
           <div class="file-footer-meta">
-            <span>{buildDate.toLocaleDateString("en-US")}</span>
-            <span>{buildDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
+            <span data-clock-utc-date>UTC ----/--/--</span>
+            <span data-clock-utc-time>UTC --:--:--</span>
+            <span data-clock-moon>MTC --:--:--</span>
           </div>
           <a href="https://github.com/primeid/magnuslisleva-tn" target="_blank" rel="noreferrer">
             Repository
@@ -72,9 +72,47 @@ const buildDate = new Date();
       const root = document.documentElement;
       const storedTheme = localStorage.getItem("theme");
       const themeButton = document.querySelector("[data-theme-toggle]");
+      const utcDateNode = document.querySelector("[data-clock-utc-date]");
+      const utcTimeNode = document.querySelector("[data-clock-utc-time]");
+      const moonTimeNode = document.querySelector("[data-clock-moon]");
       const themeOrder = ["dark", "light", "punk"];
+      const lunarEpochMs = Date.UTC(1970, 0, 1, 0, 0, 0);
+      const lunarDriftPerEarthDayMs = 58.7 / 1000;
       const formatThemeLabel = (theme) =>
         theme ? theme.charAt(0).toUpperCase() + theme.slice(1) : "Theme";
+      const formatClockParts = (date, timeZone) => {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }).formatToParts(date);
+
+        const get = (type) => parts.find((part) => part.type === type)?.value ?? "00";
+        return {
+          date: `${get("year")}-${get("month")}-${get("day")}`,
+          time: `${get("hour")}:${get("minute")}:${get("second")}`,
+        };
+      };
+      const updateClocks = () => {
+        const now = new Date();
+        const utc = formatClockParts(now, "UTC");
+
+        if (utcDateNode) utcDateNode.textContent = `UTC ${utc.date}`;
+        if (utcTimeNode) utcTimeNode.textContent = `UTC ${utc.time}`;
+
+        if (moonTimeNode) {
+          const elapsedDays = (now.getTime() - lunarEpochMs) / 86400000;
+          const lunarOffsetMs = elapsedDays * lunarDriftPerEarthDayMs;
+          const moonDate = new Date(now.getTime() + lunarOffsetMs);
+          const moon = formatClockParts(moonDate, "UTC");
+          moonTimeNode.textContent = `MTC ${moon.time}`;
+        }
+      };
       const initialTheme =
         storedTheme === "light" || storedTheme === "dark" || storedTheme === "punk"
           ? storedTheme
@@ -82,6 +120,8 @@ const buildDate = new Date();
 
       root.setAttribute("data-theme", initialTheme);
       if (themeButton) themeButton.textContent = formatThemeLabel(initialTheme);
+      updateClocks();
+      window.setInterval(updateClocks, 1000);
       themeButton?.addEventListener("animationend", () => {
         themeButton.classList.remove("theme-spin");
       });
@@ -109,16 +149,12 @@ const buildDate = new Date();
         if (storedState === "closed") details.open = false;
       });
 
-      document.querySelectorAll(".folder > summary").forEach((summary) => {
-        summary.addEventListener("click", (event) => {
-          event.preventDefault();
-          const details = summary.parentElement;
-          if (details instanceof HTMLDetailsElement) {
-            details.open = !details.open;
-            const folderId = details.dataset.folderId;
-            if (folderId) {
-              localStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
-            }
+      document.querySelectorAll(".folder").forEach((details) => {
+        if (!(details instanceof HTMLDetailsElement)) return;
+        details.addEventListener("toggle", () => {
+          const folderId = details.dataset.folderId;
+          if (folderId) {
+            localStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
           }
         });
       });
@@ -138,6 +174,7 @@ const buildDate = new Date();
 
         let dragOffset = 0;
         let dragging = false;
+        const resizeObserver = new ResizeObserver(() => syncThumb());
 
         const syncThumb = () => {
           const maxScroll = body.scrollHeight - body.clientHeight;
@@ -201,6 +238,13 @@ const buildDate = new Date();
         thumb.addEventListener("pointerup", stopDragging);
         thumb.addEventListener("pointercancel", stopDragging);
         body.addEventListener("scroll", syncThumb, { passive: true });
+        body.querySelectorAll("img").forEach((image) => {
+          if (image instanceof HTMLImageElement) {
+            image.addEventListener("load", syncThumb, { passive: true });
+          }
+        });
+        resizeObserver.observe(body);
+        resizeObserver.observe(track);
         window.addEventListener("resize", syncThumb);
         syncThumb();
       });

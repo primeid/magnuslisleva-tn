@@ -336,6 +336,7 @@ pre,
   font: inherit;
   color: inherit;
   background: transparent;
+  list-style: none;
 }
 
 .folder-caret {
@@ -447,6 +448,7 @@ pre,
   align-items: center;
   color: var(--text-soft);
   font-size: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .file-body {
