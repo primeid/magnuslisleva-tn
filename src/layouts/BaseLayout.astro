@@ -153,8 +153,22 @@ const label = fileLabel ?? title ?? "README";
         if (!(details instanceof HTMLDetailsElement)) return;
         details.addEventListener("toggle", () => {
           const folderId = details.dataset.folderId;
+          const toggleButton = details.querySelector("[data-folder-toggle]");
+          if (toggleButton instanceof HTMLButtonElement) {
+            toggleButton.setAttribute("aria-expanded", details.open ? "true" : "false");
+          }
           if (folderId) {
             localStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-folder-toggle]").forEach((toggleButton) => {
+        if (!(toggleButton instanceof HTMLButtonElement)) return;
+        toggleButton.addEventListener("click", () => {
+          const details = toggleButton.closest(".folder");
+          if (details instanceof HTMLDetailsElement) {
+            details.open = !details.open;
           }
         });
       });

@@ -41,18 +41,23 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </ul>
 
       <details open={isTexts} class="folder" data-folder-id="texts">
-        <summary class="directory-link folder-toggle">
-          <span class="folder-caret" aria-hidden="true"></span>
-          <span class="directory-icon">DIR</span>
-          <strong>Texts</strong>
-        </summary>
-        <ol>
-          <li>
-            <a href="/texts/" class={currentPath === "/texts/" ? "active-leaf" : undefined}>
-              <span class="directory-icon">IDX</span>
-              <strong>Index</strong>
-            </a>
-          </li>
+        <div class="folder-row">
+          <button
+            class="folder-toggle-button"
+            type="button"
+            aria-label="Toggle Texts folder"
+            aria-expanded={isTexts ? "true" : "false"}
+            aria-controls="folder-texts"
+            data-folder-toggle
+          >
+            <span class="folder-caret" aria-hidden="true"></span>
+          </button>
+          <a class:list={["directory-link", "folder-link", { active: currentPath === "/texts/" }]} href="/texts/">
+            <span class="directory-icon">DIR</span>
+            <strong>Texts</strong>
+          </a>
+        </div>
+        <ol id="folder-texts">
           {
             texts.map((entry) => (
               <li>
@@ -70,18 +75,26 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </details>
 
       <details open={isCreations} class="folder" data-folder-id="creations">
-        <summary class="directory-link folder-toggle">
-          <span class="folder-caret" aria-hidden="true"></span>
-          <span class="directory-icon">DIR</span>
-          <strong>Creations</strong>
-        </summary>
-        <ol>
-          <li>
-            <a href="/creations/" class={currentPath === "/creations/" ? "active-leaf" : undefined}>
-              <span class="directory-icon">IDX</span>
-              <strong>Index</strong>
-            </a>
-          </li>
+        <div class="folder-row">
+          <button
+            class="folder-toggle-button"
+            type="button"
+            aria-label="Toggle Creations folder"
+            aria-expanded={isCreations ? "true" : "false"}
+            aria-controls="folder-creations"
+            data-folder-toggle
+          >
+            <span class="folder-caret" aria-hidden="true"></span>
+          </button>
+          <a
+            class:list={["directory-link", "folder-link", { active: currentPath === "/creations/" }]}
+            href="/creations/"
+          >
+            <span class="directory-icon">DIR</span>
+            <strong>Creations</strong>
+          </a>
+        </div>
+        <ol id="folder-creations">
           {
             creations.map((entry) => (
               <li>

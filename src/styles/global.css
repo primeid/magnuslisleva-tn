@@ -290,15 +290,6 @@ pre,
   position: relative;
 }
 
-.directory summary {
-  list-style: none;
-  cursor: pointer;
-}
-
-.directory summary::-webkit-details-marker {
-  display: none;
-}
-
 .directory-link,
 .directory ol a {
   display: flex;
@@ -329,14 +320,31 @@ pre,
   border-color: var(--line-strong);
 }
 
-.folder-toggle {
-  appearance: none;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
+.folder-row {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  gap: 0.3rem;
+  align-items: stretch;
+}
+
+.folder-link {
+  min-width: 0;
+}
+
+.folder-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: transparent;
-  list-style: none;
+  cursor: pointer;
+}
+
+.folder-toggle-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--line);
 }
 
 .folder-caret {
