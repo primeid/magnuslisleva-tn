@@ -42,6 +42,12 @@ jobs:
     needs: build
     if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' }}
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_RELOAD_COMMAND: ${{ secrets.DEPLOY_RELOAD_COMMAND }}
     steps:
       - name: Download static artifact
         uses: actions/download-artifact@v4
@@ -57,18 +63,22 @@ jobs:
       - name: Add host key
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          PORT="${DEPLOY_PORT:-22}"
+          ssh-keyscan -p "$PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
       - name: Sync built site
         run: |
+          PORT="${DEPLOY_PORT:-22}"
+          TARGET_PATH="${DEPLOY_PATH:-/var/www/magnuslisleva-tn}"
           rsync -avz --delete \
-            -e "ssh -p ${{ secrets.DEPLOY_PORT || 22 }}" \
+            -e "ssh -p $PORT" \
             dist/ \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH || '/var/www/magnuslisleva-tn' }}/"
+            "$DEPLOY_USER@$DEPLOY_HOST:$TARGET_PATH/"
 
       - name: Reload web server
-        if: ${{ secrets.DEPLOY_RELOAD_COMMAND != '' }}
+        if: ${{ env.DEPLOY_RELOAD_COMMAND != '' }}
         run: |
-          ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "${{ secrets.DEPLOY_RELOAD_COMMAND }}"
+          PORT="${DEPLOY_PORT:-22}"
+          ssh -p "$PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "$DEPLOY_RELOAD_COMMAND"
