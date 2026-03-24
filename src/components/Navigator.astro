@@ -11,8 +11,8 @@ const texts = getPublishedTexts();
 const creations = getPublishedCreations();
 
 const isHome = currentPath === "/";
+const isGames = currentPath.startsWith("/games");
 const isTags = currentPath.startsWith("/tags");
-const isSnakeGame = currentPath === "/tags/game/";
 const isNewsletter = currentPath.startsWith("/newsletter");
 ---
 
@@ -100,22 +100,19 @@ const isNewsletter = currentPath.startsWith("/newsletter");
             <strong>Newsletter</strong>
           </a>
         </li>
+        <li>
+          <a class:list={["directory-link", { active: isGames }]} href="/games/">
+            <span class="directory-icon">EXE</span>
+            <strong>Games</strong>
+          </a>
+        </li>
+        <li>
+          <a class:list={["directory-link", { active: isTags }]} href="/tags/">
+            <span class="directory-icon">TAG</span>
+            <strong>Tags</strong>
+          </a>
+        </li>
       </ul>
-
-      <div class="folder folder-static is-open">
-        <a class:list={["directory-link", { active: isTags }]} href="/tags/">
-          <span class="directory-icon">TAG</span>
-          <strong>Tags</strong>
-        </a>
-        <ol>
-          <li>
-            <a href="/tags/game/" class={isSnakeGame ? "active-leaf" : undefined}>
-              <span class="directory-icon">EXE</span>
-              <strong>Game</strong>
-            </a>
-          </li>
-        </ol>
-      </div>
     </nav>
     <aside class="win-scrollbar navigator-scrollbar" aria-hidden="true">
       <button class="win-scroll-btn win-scroll-up" type="button" data-scroll-up></button>
