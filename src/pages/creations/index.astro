@@ -13,10 +13,18 @@ const grouped = groupEntriesByYear(creations);
       Creations is for work that is primarily media or software rather than prose: music, apps,
       videos, photos, podcasts, and event pages.
     </p>
-    <div class="years mono">
-      {Object.keys(grouped).map((year) => <a href={`/creations/archive/${year}/`}>{year}</a>)}
-    </div>
-    {Object.entries(grouped).map(([year, entries]) => <ArchiveGroup year={year} entries={entries} />)}
+    {
+      creations.length > 0 ? (
+        <>
+          <div class="years mono">
+            {Object.keys(grouped).map((year) => <a href={`/creations/archive/${year}/`}>{year}</a>)}
+          </div>
+          {Object.entries(grouped).map(([year, entries]) => <ArchiveGroup year={year} entries={entries} />)}
+        </>
+      ) : (
+        <p class="mono empty-state">No creations published yet.</p>
+      )
+    }
   </section>
 </BaseLayout>
 
@@ -30,6 +38,11 @@ const grouped = groupEntriesByYear(creations);
 
   .years a {
     text-decoration: none;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+  }
+
+  .empty-state {
     color: var(--text-soft);
     font-size: 0.82rem;
   }

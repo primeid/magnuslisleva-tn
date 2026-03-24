@@ -6,12 +6,14 @@ const texts = getPublishedTexts();
 const creations = getPublishedCreations();
 const recentTexts = texts.slice(0, 4);
 const recentCreations = creations.slice(0, 4);
+const featuredImage =
+  texts.find((entry) => entry.data.cover)?.data.cover ?? "/earth-mark.svg";
 ---
 
 <BaseLayout fileLabel="README">
   <article class="content-area readme-page">
     <figure class="readme-figure media-frame">
-      <img src="/media/forest-notebook/forest-cover.svg" alt="Botanical cover study" />
+      <img src={featuredImage} alt="Featured essay image" />
     </figure>
     <p>Howdy. Magnus here.</p>
     <p>
@@ -36,7 +38,11 @@ const recentCreations = creations.slice(0, 4);
       <h2>Recent Creations</h2>
     </div>
     <ul class="readme-list">
-      {recentCreations.map((entry) => <li><a href={`/creations/${entry.slug}/`}>{entry.data.title}</a></li>)}
+      {
+        recentCreations.length > 0
+          ? recentCreations.map((entry) => <li><a href={`/creations/${entry.slug}/`}>{entry.data.title}</a></li>)
+          : <li>No creations published yet.</li>
+      }
     </ul>
   </article>
 </BaseLayout>
