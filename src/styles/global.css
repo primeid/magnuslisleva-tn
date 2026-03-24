@@ -290,10 +290,6 @@ pre,
   position: relative;
 }
 
-.directory summary::-webkit-details-marker {
-  display: none;
-}
-
 .directory-link,
 .directory ol a {
   display: flex;
@@ -325,31 +321,11 @@ pre,
 }
 
 .folder-summary {
-  list-style: none;
-  display: grid;
-  grid-template-columns: 1.7rem minmax(0, 1fr);
-  gap: 0.3rem;
-  align-items: stretch;
+  display: block;
 }
 
 .folder-link {
   min-width: 0;
-}
-
-.folder-caret-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  cursor: pointer;
-}
-
-.folder-caret-button:hover {
-  background: var(--accent-soft);
-  border-color: var(--line);
 }
 
 .folder-caret {

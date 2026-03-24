@@ -144,7 +144,7 @@ const label = fileLabel ?? title ?? "README";
         const folderId = details.dataset.folderId;
         if (!folderId) return;
 
-        const storedState = localStorage.getItem(`folder:${folderId}`);
+        const storedState = sessionStorage.getItem(`folder:${folderId}`);
         if (storedState === "open") details.open = true;
         if (storedState === "closed") details.open = false;
       });
@@ -154,19 +154,28 @@ const label = fileLabel ?? title ?? "README";
         details.addEventListener("toggle", () => {
           const folderId = details.dataset.folderId;
           if (folderId) {
-            localStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
+            sessionStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
           }
         });
       });
 
-      document.querySelectorAll("[data-folder-toggle]").forEach((toggle) => {
-        if (!(toggle instanceof HTMLButtonElement)) return;
-        toggle.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const details = toggle.closest(".folder");
+      document.querySelectorAll("[data-folder-link]").forEach((link) => {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        link.addEventListener("click", (event) => {
+          const details = link.closest(".folder");
           if (details instanceof HTMLDetailsElement) {
-            details.open = !details.open;
+            const href = link.getAttribute("href");
+            const onFolderIndex = href ? window.location.pathname === href : false;
+
+            if (!details.open) {
+              details.open = true;
+              return;
+            }
+
+            if (onFolderIndex) {
+              event.preventDefault();
+              details.open = false;
+            }
           }
         });
       });
