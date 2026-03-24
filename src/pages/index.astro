@@ -17,6 +17,10 @@ import { siteConfig } from "../site.config";
         <li><a href={link.href} target="_blank" rel="noreferrer">{link.label}</a></li>
       ))}
     </ul>
+    <p class="about-credit">
+      Thanks to <a href="https://robinrendle.com/" target="_blank" rel="noreferrer">Robin Rendle</a>
+      for the site inspiration.
+    </p>
   </article>
 </BaseLayout>
 
@@ -66,6 +70,19 @@ import { siteConfig } from "../site.config";
     border-color: var(--line-strong);
     color: var(--accent-strong);
     background: color-mix(in srgb, var(--accent-soft) 72%, var(--panel) 28%);
+  }
+
+  .about-credit {
+    margin: 0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    text-align: center;
+  }
+
+  .about-credit a {
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
   }
 
   @media (max-width: 720px) {
