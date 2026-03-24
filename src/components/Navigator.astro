@@ -41,13 +41,11 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </ul>
 
       <details open={isTexts} class="folder" data-folder-id="texts">
-        <div class="folder-row">
+        <summary class="folder-summary">
           <button
-            class="folder-toggle-button"
+            class="folder-caret-button"
             type="button"
             aria-label="Toggle Texts folder"
-            aria-expanded={isTexts ? "true" : "false"}
-            aria-controls="folder-texts"
             data-folder-toggle
           >
             <span class="folder-caret" aria-hidden="true"></span>
@@ -56,8 +54,8 @@ const isNewsletter = currentPath.startsWith("/newsletter");
             <span class="directory-icon">DIR</span>
             <strong>Texts</strong>
           </a>
-        </div>
-        <ol id="folder-texts">
+        </summary>
+        <ol>
           {
             texts.map((entry) => (
               <li>
@@ -75,13 +73,11 @@ const isNewsletter = currentPath.startsWith("/newsletter");
       </details>
 
       <details open={isCreations} class="folder" data-folder-id="creations">
-        <div class="folder-row">
+        <summary class="folder-summary">
           <button
-            class="folder-toggle-button"
+            class="folder-caret-button"
             type="button"
             aria-label="Toggle Creations folder"
-            aria-expanded={isCreations ? "true" : "false"}
-            aria-controls="folder-creations"
             data-folder-toggle
           >
             <span class="folder-caret" aria-hidden="true"></span>
@@ -93,8 +89,8 @@ const isNewsletter = currentPath.startsWith("/newsletter");
             <span class="directory-icon">DIR</span>
             <strong>Creations</strong>
           </a>
-        </div>
-        <ol id="folder-creations">
+        </summary>
+        <ol>
           {
             creations.map((entry) => (
               <li>
