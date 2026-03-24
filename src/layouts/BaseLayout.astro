@@ -139,43 +139,40 @@ const label = fileLabel ?? title ?? "README";
         themeButton.classList.add("theme-spin");
       });
 
-      document.querySelectorAll(".folder").forEach((details) => {
-        if (!(details instanceof HTMLDetailsElement)) return;
-        const folderId = details.dataset.folderId;
+      document.querySelectorAll(".folder").forEach((folder) => {
+        if (!(folder instanceof HTMLElement)) return;
+        const folderId = folder.dataset.folderId;
         if (!folderId) return;
 
         const storedState = sessionStorage.getItem(`folder:${folderId}`);
-        if (storedState === "open") details.open = true;
-        if (storedState === "closed") details.open = false;
-      });
-
-      document.querySelectorAll(".folder").forEach((details) => {
-        if (!(details instanceof HTMLDetailsElement)) return;
-        details.addEventListener("toggle", () => {
-          const folderId = details.dataset.folderId;
-          if (folderId) {
-            sessionStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
-          }
-        });
+        const isOpen = storedState === "open";
+        folder.classList.toggle("is-open", isOpen);
       });
 
       document.querySelectorAll("[data-folder-link]").forEach((link) => {
         if (!(link instanceof HTMLAnchorElement)) return;
         link.addEventListener("click", (event) => {
-          const details = link.closest(".folder");
-          if (details instanceof HTMLDetailsElement) {
+          const folder = link.closest(".folder");
+          if (folder instanceof HTMLElement) {
+            const folderId = folder.dataset.folderId;
             const href = link.getAttribute("href");
             const onFolderIndex = href ? window.location.pathname === href : false;
+            const isOpen = folder.classList.contains("is-open");
 
-            if (!details.open) {
-              details.open = true;
+            if (!isOpen) {
+              folder.classList.add("is-open");
+              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
               return;
             }
 
             if (onFolderIndex) {
               event.preventDefault();
-              details.open = false;
+              folder.classList.remove("is-open");
+              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "closed");
+              return;
             }
+
+            if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
           }
         });
       });

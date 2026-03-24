@@ -320,10 +320,6 @@ pre,
   border-color: var(--line-strong);
 }
 
-.folder-summary {
-  display: block;
-}
-
 .folder-link {
   min-width: 0;
 }
@@ -337,13 +333,21 @@ pre,
   transition: transform 120ms ease;
 }
 
-.folder[open] .folder-caret {
+.folder.is-open .folder-caret {
   transform: rotate(90deg);
 }
 
 .folder-caret-inline {
   margin-left: -0.2rem;
   margin-right: 0.15rem;
+}
+
+.folder > ol {
+  display: none;
+}
+
+.folder.is-open > ol {
+  display: block;
 }
 
 .directory-icon {
