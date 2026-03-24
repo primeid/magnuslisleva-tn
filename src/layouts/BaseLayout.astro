@@ -80,6 +80,11 @@ const label = fileLabel ?? title ?? "README";
       const lunarDriftPerEarthDayMs = 58.7 / 1000;
       const formatThemeLabel = (theme) =>
         theme ? theme.charAt(0).toUpperCase() + theme.slice(1) : "Theme";
+      const normalizePath = (value) => {
+        if (!value) return "/";
+        if (value === "/") return "/";
+        return value.endsWith("/") ? value.slice(0, -1) : value;
+      };
       const formatClockParts = (date, timeZone) => {
         const parts = new Intl.DateTimeFormat("en-CA", {
           timeZone,
@@ -163,7 +168,9 @@ const label = fileLabel ?? title ?? "README";
           if (folder instanceof HTMLElement) {
             const folderId = folder.dataset.folderId;
             const href = link.getAttribute("href");
-            const onFolderIndex = href ? window.location.pathname === href : false;
+            const onFolderIndex = href
+              ? normalizePath(window.location.pathname) === normalizePath(href)
+              : false;
             const isOpen = folder.classList.contains("is-open");
 
             if (!isOpen) {
