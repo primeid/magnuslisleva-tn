@@ -365,6 +365,11 @@ pre,
   transform: rotate(90deg);
 }
 
+.folder-caret-inline {
+  margin-left: -0.2rem;
+  margin-right: 0.15rem;
+}
+
 .directory-icon {
   min-width: 2.4rem;
   color: var(--text-soft);

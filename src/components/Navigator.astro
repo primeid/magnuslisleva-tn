@@ -51,6 +51,8 @@ const isNewsletter = currentPath.startsWith("/newsletter");
             <span class="folder-caret" aria-hidden="true"></span>
           </button>
           <a class:list={["directory-link", "folder-link", { active: currentPath === "/texts/" }]} href="/texts/">
+            <span class="directory-icon">DIR</span>
+            <span class="folder-caret folder-caret-inline" aria-hidden="true"></span>
             <strong>Texts</strong>
           </a>
         </summary>
@@ -85,6 +87,8 @@ const isNewsletter = currentPath.startsWith("/newsletter");
             class:list={["directory-link", "folder-link", { active: currentPath === "/creations/" }]}
             href="/creations/"
           >
+            <span class="directory-icon">DIR</span>
+            <span class="folder-caret folder-caret-inline" aria-hidden="true"></span>
             <strong>Creations</strong>
           </a>
         </summary>
