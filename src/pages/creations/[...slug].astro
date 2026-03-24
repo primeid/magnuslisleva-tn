@@ -1,0 +1,16 @@
+---
+import { getEntrySlug, getPublishedCreations } from "../../lib/content";
+import EntryLayout from "../../layouts/EntryLayout.astro";
+
+export async function getStaticPaths() {
+  const creations = getPublishedCreations();
+  return creations.map((entry) => ({
+    params: { slug: getEntrySlug(entry) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+---
+
+<EntryLayout entry={entry} />

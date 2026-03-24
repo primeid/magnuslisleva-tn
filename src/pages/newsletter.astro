@@ -1,0 +1,106 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteConfig } from "../site.config";
+
+const configured = siteConfig.mailchimpAction.length > 0;
+---
+
+<BaseLayout title="Newsletter" description="Join the mailing list.">
+  <section class="shell newsletter-page">
+    <div class="copy">
+      <p class="eyebrow">Newsletter</p>
+      <h1>Quiet updates, no feed pressure.</h1>
+      <p>
+        Newsletter signup is intentionally separated from the rest of the site. Add the Mailchimp
+        form action in `src/site.config.ts` and this page will submit directly to your list.
+      </p>
+    </div>
+
+    <div class="card signup">
+      {
+        configured ? (
+          <form action={siteConfig.mailchimpAction} method="post" target="_blank" novalidate>
+            <label for="email" class="mono">Email</label>
+            <input id="email" type="email" name="EMAIL" required placeholder="you@example.com" />
+            <button type="submit">Join the list</button>
+          </form>
+        ) : (
+          <div class="placeholder">
+            <p class="mono">Mailchimp not configured yet.</p>
+            <p>
+              Set `mailchimpAction` in `src/site.config.ts` to the exact Mailchimp form action URL.
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .newsletter-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 24rem;
+    gap: 1.5rem;
+    padding: 3rem 0 4rem;
+  }
+
+  h1 {
+    margin: 0.55rem 0 1rem;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    line-height: 0.95;
+    max-width: 9ch;
+  }
+
+  .copy p:last-child {
+    max-width: 34rem;
+    color: var(--text-soft);
+  }
+
+  .signup {
+    padding: 1.25rem;
+    align-self: start;
+  }
+
+  form {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+  }
+
+  input,
+  button {
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font: inherit;
+  }
+
+  input {
+    padding: 0.9rem 1rem;
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  button {
+    padding: 0.9rem 1rem;
+    background: var(--accent);
+    color: #f4f0e6;
+    cursor: pointer;
+  }
+
+  .placeholder p:first-child {
+    margin-top: 0;
+  }
+
+  @media (max-width: 880px) {
+    .newsletter-page {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

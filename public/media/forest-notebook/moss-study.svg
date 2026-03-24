@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title">
+  <title id="title">Moss study placeholder</title>
+  <rect width="960" height="720" fill="#e7dece" />
+  <g fill="#4f6b57">
+    <circle cx="250" cy="420" r="96" />
+    <circle cx="370" cy="370" r="82" />
+    <circle cx="470" cy="446" r="114" />
+    <circle cx="594" cy="384" r="88" />
+    <circle cx="700" cy="454" r="106" />
+  </g>
+  <g fill="#dce7cf" opacity="0.84">
+    <circle cx="314" cy="393" r="23" />
+    <circle cx="420" cy="468" r="19" />
+    <circle cx="658" cy="404" r="26" />
+    <circle cx="751" cy="491" r="18" />
+  </g>
+</svg>

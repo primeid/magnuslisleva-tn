@@ -1,0 +1,45 @@
+---
+import type { Entry } from "../lib/content";
+import EntryCard from "./EntryCard.astro";
+
+interface Props {
+  year: string;
+  entries: Entry[];
+}
+
+const { year, entries } = Astro.props;
+---
+
+<section class="archive-group">
+  <div class="year mono">{year}</div>
+  <div class="entries">
+    {entries.map((entry) => <EntryCard entry={entry} />)}
+  </div>
+</section>
+
+<style>
+  .archive-group {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 1rem 1.5rem;
+    padding: 1rem 0 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .year {
+    padding-top: 0.8rem;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+  }
+
+  .entries {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .archive-group {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

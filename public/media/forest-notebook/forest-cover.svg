@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Forest cover placeholder</title>
+  <desc id="desc">Abstract moss green botanical illustration.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#dce7cf" />
+      <stop offset="100%" stop-color="#4f6b57" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="720" fill="#ede6d8" />
+  <circle cx="240" cy="220" r="170" fill="url(#g)" opacity="0.75" />
+  <circle cx="870" cy="520" r="230" fill="#8d6448" opacity="0.32" />
+  <path d="M589 150c110 85 160 189 145 313-15 117-92 181-231 193 74-44 113-111 116-202 4-90-31-170-107-239 25-25 51-47 77-65z" fill="#28523f" />
+  <path d="M328 594c91-118 168-173 232-167 66 5 113 41 143 107-77-18-143-8-197 28-56 35-114 46-178 32z" fill="#dce7cf" opacity="0.88" />
+</svg>

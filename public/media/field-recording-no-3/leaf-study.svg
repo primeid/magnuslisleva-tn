@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title">
+  <title id="title">Leaf study placeholder</title>
+  <rect width="960" height="720" fill="#ece5d7" />
+  <path d="M460 120c100 0 188 60 230 154 38 88 28 190-31 289-64 108-147 159-248 156 55-39 95-87 121-146 54-117 38-263-72-413z" fill="#2f5a46" />
+  <path d="M445 168c-9 161-60 304-155 429" stroke="#d8e2cb" stroke-width="12" fill="none" stroke-linecap="round" />
+  <path d="M352 336c49 4 101-9 156-40M314 423c62 0 120-20 175-61M280 513c54 5 110-12 167-50" stroke="#d8e2cb" stroke-width="8" fill="none" stroke-linecap="round" />
+</svg>

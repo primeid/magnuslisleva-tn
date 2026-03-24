@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title">
+  <title id="title">Pollen Signal placeholder</title>
+  <rect width="1200" height="720" fill="#172920" />
+  <circle cx="266" cy="233" r="143" fill="#9ab59f" opacity="0.58" />
+  <circle cx="852" cy="442" r="228" fill="#274235" />
+  <path d="M180 530c113-26 216-78 307-157 89-76 180-133 273-171 100-39 187-49 260-28" stroke="#dce7cf" stroke-width="10" fill="none" stroke-linecap="round" />
+  <circle cx="582" cy="305" r="16" fill="#ede6d8" />
+  <circle cx="707" cy="255" r="12" fill="#ede6d8" />
+  <circle cx="812" cy="228" r="10" fill="#ede6d8" />
+</svg>

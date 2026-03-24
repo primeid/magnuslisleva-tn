@@ -1,0 +1,78 @@
+---
+import type { Entry } from "../lib/content";
+import { getEntryUrl } from "../lib/content";
+import TagList from "./TagList.astro";
+
+interface Props {
+  entry: Entry;
+}
+
+const { entry } = Astro.props;
+const href = getEntryUrl(entry);
+const isCreation = entry.collection === "creations";
+---
+
+<article class="card entry-card">
+  <div class="entry-meta mono">
+    <span>{isCreation ? "Creation" : "Text"}</span>
+    <span>{entry.data.publishDate.getFullYear()}</span>
+  </div>
+
+  <div class="entry-main">
+    <h3>
+      <a href={href}>{entry.data.title}</a>
+    </h3>
+    <p>{entry.data.excerpt}</p>
+    <TagList tags={entry.data.tags} />
+  </div>
+</article>
+
+<style>
+  .entry-card {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.2rem;
+  }
+
+  .entry-meta {
+    display: grid;
+    gap: 0.4rem;
+    align-content: start;
+    color: var(--text-soft);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .entry-main {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+    line-height: 1.05;
+  }
+
+  h3 a {
+    text-decoration: none;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-soft);
+  }
+
+  @media (max-width: 720px) {
+    .entry-card {
+      grid-template-columns: 1fr;
+    }
+
+    .entry-meta {
+      grid-auto-flow: column;
+      justify-content: start;
+    }
+  }
+</style>

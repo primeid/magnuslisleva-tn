@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EntryCard from "../../../components/EntryCard.astro";
+import { getPublishedTexts, groupEntriesByYear } from "../../../lib/content";
+
+export async function getStaticPaths() {
+  const texts = getPublishedTexts();
+  const grouped = groupEntriesByYear(texts);
+  return Object.entries(grouped).map(([year, entries]) => ({
+    params: { year },
+    props: { year, entries },
+  }));
+}
+
+const { year, entries } = Astro.props;
+---
+
+<BaseLayout title={`Texts ${year}`} description={`Texts from ${year}.`}>
+  <section class="shell archive-page">
+    <p class="eyebrow">Texts archive</p>
+    <h1>{year}</h1>
+    <div class="stack">
+      {entries.map((entry) => <EntryCard entry={entry} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .archive-page {
+    padding: 2rem 0 4rem;
+  }
+
+  h1 {
+    margin: 0.55rem 0 1.4rem;
+    font-size: clamp(2.8rem, 8vw, 4.5rem);
+    line-height: 0.95;
+  }
+
+  .stack {
+    display: grid;
+    gap: 1rem;
+  }
+</style>

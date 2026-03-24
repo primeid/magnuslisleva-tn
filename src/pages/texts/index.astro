@@ -1,0 +1,62 @@
+---
+import ArchiveGroup from "../../components/ArchiveGroup.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPublishedTexts, groupEntriesByYear } from "../../lib/content";
+
+const texts = getPublishedTexts();
+const grouped = groupEntriesByYear(texts);
+---
+
+<BaseLayout title="Texts" description="Short and long-form writing.">
+  <section class="shell listing">
+    <div class="heading">
+      <p class="eyebrow">Texts</p>
+      <h1>Short notes and long-form texts.</h1>
+      <p class="summary">
+        Everything textual lives here. Essays, fragments, field notes, and photo-led entries.
+      </p>
+    </div>
+
+    <div class="years mono">
+      {Object.keys(grouped).map((year) => <a href={`/texts/archive/${year}/`}>{year}</a>)}
+    </div>
+
+    {Object.entries(grouped).map(([year, entries]) => <ArchiveGroup year={year} entries={entries} />)}
+  </section>
+</BaseLayout>
+
+<style>
+  .listing {
+    padding-bottom: 4rem;
+  }
+
+  .heading {
+    padding: 2rem 0;
+  }
+
+  h1 {
+    margin: 0.55rem 0 0.7rem;
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    line-height: 0.95;
+    max-width: 11ch;
+  }
+
+  .summary {
+    max-width: 36rem;
+    margin: 0;
+    color: var(--text-soft);
+  }
+
+  .years {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.25rem 0 1.75rem;
+  }
+
+  .years a {
+    text-decoration: none;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+  }
+</style>
