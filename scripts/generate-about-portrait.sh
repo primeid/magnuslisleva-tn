@@ -15,20 +15,21 @@ magick "$input_path" \
   -gravity north \
   -crop 561x760+0+140 +repage \
   -colorspace Gray \
-  -contrast-stretch 2%x1% \
-  -sigmoidal-contrast 8,45% \
-  -resize 48x64! \
-  -background '#080a09' \
+  -contrast-stretch 3%x2% \
+  -sigmoidal-contrast 7,48% \
+  -resize 68x92! \
+  -background '#050806' \
   -gravity center \
-  -extent 48x64 \
-  -ordered-dither o8x8,3 \
+  -extent 68x92 \
+  -ordered-dither o8x8,4 \
   +dither \
-  -colors 12 \
-  -fill '#93aca3' \
-  -colorize 6 \
-  -modulate 100,88,100 \
-  -resize 340x454! \
+  -colors 18 \
+  -fill '#7f9a90' \
+  -colorize 10 \
+  -modulate 98,90,100 \
+  -resize 340x460! \
   -filter point \
-  -resize 680x908! \
-  -quality 78 \
+  -resize 680x920! \
+  -vignette 0x12+0+0 \
+  -quality 80 \
   "$output_path"
