@@ -8,7 +8,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   fileLabel="Games"
 >
   <section class="content-area game-page">
-    <p>Snake. Arrow keys or WASD. Press space to restart.</p>
+    <p>Snake. Press space to start. Arrow keys or WASD to move. Press space again to restart.</p>
     <div class="game-shell media-frame">
       <canvas
         class="snake-board"
@@ -33,6 +33,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       const ctx = canvas.getContext("2d");
       const gridSize = 16;
       const tileSize = canvas.width / gridSize;
+      const rootStyles = getComputedStyle(document.documentElement);
       const initialSnake = [
         { x: 8, y: 8 },
         { x: 7, y: 8 },
@@ -44,7 +45,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       let nextDirection = { x: 1, y: 0 };
       let food = { x: 11, y: 8 };
       let score = 0;
-      let running = true;
+      let running = false;
+
+      const palette = () => ({
+        board: rootStyles.getPropertyValue("--panel").trim() || "#101511",
+        grid: rootStyles.getPropertyValue("--line").trim() || "#2a3a2d",
+        food: rootStyles.getPropertyValue("--accent-strong").trim() || "#d5f6d7",
+        head: rootStyles.getPropertyValue("--accent").trim() || "#8bb49a",
+        body: rootStyles.getPropertyValue("--text-soft").trim() || "#5c8b67",
+      });
 
       const randomFood = () => {
         while (true) {
@@ -60,10 +69,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
       const paint = () => {
         if (!ctx) return;
-        ctx.fillStyle = "#101511";
+        const colors = palette();
+        ctx.fillStyle = colors.board;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = "rgba(139, 180, 154, 0.16)";
+        ctx.strokeStyle = colors.grid;
         ctx.lineWidth = 1;
         for (let i = 0; i <= gridSize; i += 1) {
           const offset = i * tileSize;
@@ -77,18 +87,20 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
           ctx.stroke();
         }
 
-        ctx.fillStyle = "#d5f6d7";
+        ctx.fillStyle = colors.food;
         ctx.fillRect(food.x * tileSize + 4, food.y * tileSize + 4, tileSize - 8, tileSize - 8);
 
         snake.forEach((segment, index) => {
-          ctx.fillStyle = index === 0 ? "#b7efc5" : "#5c8b67";
+          ctx.fillStyle = index === 0 ? colors.head : colors.body;
           ctx.fillRect(segment.x * tileSize + 2, segment.y * tileSize + 2, tileSize - 4, tileSize - 4);
         });
       };
 
       const updateMeta = () => {
         if (scoreNode) scoreNode.textContent = `Score ${score}`;
-        if (statusNode) statusNode.textContent = running ? "Running" : "Game over";
+        if (statusNode) {
+          statusNode.textContent = running ? "Running" : score > 0 ? "Game over" : "Press space";
+        }
       };
 
       const reset = () => {
