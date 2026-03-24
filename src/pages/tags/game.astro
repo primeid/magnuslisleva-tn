@@ -1,0 +1,191 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Game"
+  description="A tiny snake game tucked under tags."
+  fileLabel="Game"
+>
+  <section class="content-area game-page">
+    <p>Snake. Arrow keys or WASD. Press space to restart.</p>
+    <div class="game-shell media-frame">
+      <canvas
+        class="snake-board"
+        width="384"
+        height="384"
+        aria-label="Snake game board"
+        data-snake-board
+      ></canvas>
+      <div class="game-meta mono">
+        <span data-snake-score>Score 0</span>
+        <span data-snake-status>Running</span>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const canvas = document.querySelector("[data-snake-board]");
+    const scoreNode = document.querySelector("[data-snake-score]");
+    const statusNode = document.querySelector("[data-snake-status]");
+
+    if (canvas instanceof HTMLCanvasElement) {
+      const ctx = canvas.getContext("2d");
+      const gridSize = 16;
+      const tileSize = canvas.width / gridSize;
+      const initialSnake = [
+        { x: 8, y: 8 },
+        { x: 7, y: 8 },
+        { x: 6, y: 8 },
+      ];
+
+      let snake = initialSnake.map((segment) => ({ ...segment }));
+      let direction = { x: 1, y: 0 };
+      let nextDirection = { x: 1, y: 0 };
+      let food = { x: 11, y: 8 };
+      let score = 0;
+      let running = true;
+
+      const randomFood = () => {
+        while (true) {
+          const candidate = {
+            x: Math.floor(Math.random() * gridSize),
+            y: Math.floor(Math.random() * gridSize),
+          };
+          if (!snake.some((segment) => segment.x === candidate.x && segment.y === candidate.y)) {
+            return candidate;
+          }
+        }
+      };
+
+      const paint = () => {
+        if (!ctx) return;
+        ctx.fillStyle = "#101511";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "rgba(139, 180, 154, 0.16)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= gridSize; i += 1) {
+          const offset = i * tileSize;
+          ctx.beginPath();
+          ctx.moveTo(offset, 0);
+          ctx.lineTo(offset, canvas.height);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, offset);
+          ctx.lineTo(canvas.width, offset);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "#d5f6d7";
+        ctx.fillRect(food.x * tileSize + 4, food.y * tileSize + 4, tileSize - 8, tileSize - 8);
+
+        snake.forEach((segment, index) => {
+          ctx.fillStyle = index === 0 ? "#b7efc5" : "#5c8b67";
+          ctx.fillRect(segment.x * tileSize + 2, segment.y * tileSize + 2, tileSize - 4, tileSize - 4);
+        });
+      };
+
+      const updateMeta = () => {
+        if (scoreNode) scoreNode.textContent = `Score ${score}`;
+        if (statusNode) statusNode.textContent = running ? "Running" : "Game over";
+      };
+
+      const reset = () => {
+        snake = initialSnake.map((segment) => ({ ...segment }));
+        direction = { x: 1, y: 0 };
+        nextDirection = { x: 1, y: 0 };
+        food = randomFood();
+        score = 0;
+        running = true;
+        updateMeta();
+        paint();
+      };
+
+      const tick = () => {
+        if (!running) return;
+        direction = nextDirection;
+
+        const head = {
+          x: snake[0].x + direction.x,
+          y: snake[0].y + direction.y,
+        };
+
+        if (
+          head.x < 0 ||
+          head.y < 0 ||
+          head.x >= gridSize ||
+          head.y >= gridSize ||
+          snake.some((segment) => segment.x === head.x && segment.y === head.y)
+        ) {
+          running = false;
+          updateMeta();
+          paint();
+          return;
+        }
+
+        snake.unshift(head);
+
+        if (head.x === food.x && head.y === food.y) {
+          score += 1;
+          food = randomFood();
+        } else {
+          snake.pop();
+        }
+
+        updateMeta();
+        paint();
+      };
+
+      const setDirection = (x, y) => {
+        if (direction.x === -x && direction.y === -y) return;
+        nextDirection = { x, y };
+      };
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp" || event.key === "w" || event.key === "W") setDirection(0, -1);
+        if (event.key === "ArrowDown" || event.key === "s" || event.key === "S") setDirection(0, 1);
+        if (event.key === "ArrowLeft" || event.key === "a" || event.key === "A") setDirection(-1, 0);
+        if (event.key === "ArrowRight" || event.key === "d" || event.key === "D") setDirection(1, 0);
+        if (event.key === " ") {
+          event.preventDefault();
+          reset();
+        }
+      });
+
+      updateMeta();
+      paint();
+      window.setInterval(tick, 115);
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .game-page {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .game-shell {
+    width: min(100%, 28rem);
+    padding: 0.9rem;
+  }
+
+  .snake-board {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--line);
+    background: #101511;
+    image-rendering: pixelated;
+  }
+
+  .game-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+</style>
