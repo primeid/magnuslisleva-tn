@@ -6,10 +6,9 @@ const entries = getAllPublishedEntries();
 const tags = getUniqueTags(entries);
 ---
 
-<BaseLayout title="Tags" description="Explore texts and creations by tag.">
-  <section class="shell tags-page">
-    <p class="eyebrow">Tags</p>
-    <h1>Browse the site through themes and media.</h1>
+<BaseLayout title="Tags" description="Explore texts and creations by tag." fileLabel="Tags">
+  <section class="content-area">
+    <p>Browse the archive through themes and media types.</p>
     <div class="tag-grid">
       {tags.map((tag) => <a class="tag tag-link" href={`/tags/${slugifyTag(tag)}/`}>{tag}</a>)}
     </div>
@@ -17,17 +16,6 @@ const tags = getUniqueTags(entries);
 </BaseLayout>
 
 <style>
-  .tags-page {
-    padding: 2rem 0 4rem;
-  }
-
-  h1 {
-    margin: 0.55rem 0 1.5rem;
-    font-size: clamp(2.8rem, 8vw, 5rem);
-    line-height: 0.95;
-    max-width: 11ch;
-  }
-
   .tag-grid {
     display: flex;
     gap: 0.8rem;
@@ -36,6 +24,5 @@ const tags = getUniqueTags(entries);
 
   .tag-link {
     font-size: 0.9rem;
-    padding: 0.7rem 1rem;
   }
 </style>

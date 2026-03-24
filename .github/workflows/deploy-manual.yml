@@ -1,18 +1,18 @@
 name: Deploy Static Site
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' }}
-    runs-on: ubuntu-latest
-    env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      DEPLOY_RELOAD_COMMAND: ${{ secrets.DEPLOY_RELOAD_COMMAND }}
+    runs-on: [self-hosted, magnus-blog, deploy]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,30 +29,6 @@ jobs:
       - name: Build static site
         run: npm run build
 
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-
-      - name: Add host key
+      - name: Publish site
         run: |
-          mkdir -p ~/.ssh
-          PORT="${DEPLOY_PORT:-22}"
-          ssh-keyscan -p "$PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-
-      - name: Sync built site
-        run: |
-          PORT="${DEPLOY_PORT:-22}"
-          TARGET_PATH="${DEPLOY_PATH:-/var/www/magnuslisleva-tn}"
-          rsync -avz --delete \
-            -e "ssh -p $PORT" \
-            dist/ \
-            "$DEPLOY_USER@$DEPLOY_HOST:$TARGET_PATH/"
-
-      - name: Reload web server
-        if: ${{ env.DEPLOY_RELOAD_COMMAND != '' }}
-        run: |
-          PORT="${DEPLOY_PORT:-22}"
-          ssh -p "$PORT" \
-            "$DEPLOY_USER@$DEPLOY_HOST" \
-            "$DEPLOY_RELOAD_COMMAND"
+          rsync -av --delete dist/ /srv/magnus-blog/site/

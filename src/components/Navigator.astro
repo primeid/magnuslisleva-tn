@@ -1,0 +1,128 @@
+---
+import { getPublishedCreations, getPublishedTexts } from "../lib/content";
+import { siteConfig } from "../site.config";
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+const texts = getPublishedTexts();
+const creations = getPublishedCreations();
+
+const isHome = currentPath === "/";
+const isTexts = currentPath.startsWith("/texts");
+const isCreations = currentPath.startsWith("/creations");
+const isTags = currentPath.startsWith("/tags");
+const isNewsletter = currentPath.startsWith("/newsletter");
+---
+
+<aside class="navigator-shell">
+  <section class="navigator-header">
+    <div class="navigator-profile">
+      <a class="navigator-mark" href="/" aria-label="Open README">
+        <img src="/earth-mark.svg" alt="" />
+      </a>
+      <div>
+        <a href="/">{siteConfig.title}</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigator-scroll-shell" data-win-scroll-shell>
+    <nav class="directory" aria-label="Site directory" data-win-scroll-body>
+      <ul>
+        <li>
+          <a class:list={["directory-link", { active: isHome }]} href="/">
+            <span class="directory-icon">README</span>
+            <strong>About</strong>
+          </a>
+        </li>
+      </ul>
+
+      <details open={isTexts} class="folder" data-folder-id="texts">
+        <summary>
+          <button class="directory-link folder-toggle" type="button">
+            <span class="folder-caret" aria-hidden="true"></span>
+            <span class="directory-icon">DIR</span>
+            <strong>Texts</strong>
+          </button>
+        </summary>
+        <ol>
+          <li>
+            <a href="/texts/" class={currentPath === "/texts/" ? "active-leaf" : undefined}>
+              <span class="directory-icon">IDX</span>
+              <strong>Index</strong>
+            </a>
+          </li>
+          {
+            texts.map((entry) => (
+              <li>
+                <a
+                  href={`/texts/${entry.slug}/`}
+                  class={currentPath === `/texts/${entry.slug}/` ? "active-leaf" : undefined}
+                >
+                  <span class="directory-icon">TXT</span>
+                  <strong>{entry.data.title}</strong>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </details>
+
+      <details open={isCreations} class="folder" data-folder-id="creations">
+        <summary>
+          <button class="directory-link folder-toggle" type="button">
+            <span class="folder-caret" aria-hidden="true"></span>
+            <span class="directory-icon">DIR</span>
+            <strong>Creations</strong>
+          </button>
+        </summary>
+        <ol>
+          <li>
+            <a href="/creations/" class={currentPath === "/creations/" ? "active-leaf" : undefined}>
+              <span class="directory-icon">IDX</span>
+              <strong>Index</strong>
+            </a>
+          </li>
+          {
+            creations.map((entry) => (
+              <li>
+                <a
+                  href={`/creations/${entry.slug}/`}
+                  class={currentPath === `/creations/${entry.slug}/` ? "active-leaf" : undefined}
+                >
+                  <span class="directory-icon">MED</span>
+                  <strong>{entry.data.title}</strong>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </details>
+
+      <ul>
+        <li>
+          <a class:list={["directory-link", { active: isNewsletter }]} href="/newsletter/">
+            <span class="directory-icon">MAIL</span>
+            <strong>Newsletter</strong>
+          </a>
+        </li>
+        <li>
+          <a class:list={["directory-link", { active: isTags }]} href="/tags/">
+            <span class="directory-icon">TAG</span>
+            <strong>Tags</strong>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <aside class="win-scrollbar navigator-scrollbar" aria-hidden="true">
+      <button class="win-scroll-btn win-scroll-up" type="button" data-scroll-up></button>
+      <div class="win-scroll-track" data-scroll-track>
+        <div class="win-scroll-thumb" data-scroll-thumb></div>
+      </div>
+      <button class="win-scroll-btn win-scroll-down" type="button" data-scroll-down></button>
+    </aside>
+  </div>
+</aside>

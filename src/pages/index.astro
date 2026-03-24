@@ -1,164 +1,58 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import EntryCard from "../components/EntryCard.astro";
-import SectionTitle from "../components/SectionTitle.astro";
 import { getPublishedCreations, getPublishedTexts } from "../lib/content";
-import { siteConfig } from "../site.config";
 
 const texts = getPublishedTexts();
 const creations = getPublishedCreations();
-const recentTexts = texts.slice(0, 3);
-const recentCreations = creations.slice(0, 3);
+const recentTexts = texts.slice(0, 4);
+const recentCreations = creations.slice(0, 4);
 ---
 
-<BaseLayout>
-  <section class="shell home-hero">
-    <div class="intro">
-      <p class="eyebrow">About</p>
-      <h1>{siteConfig.title}</h1>
-      <p class="lede">
-        A personal publication with the pacing of a notebook and the structure of an index.
-        Writing, digital work, field observations, and experiments live together here.
-      </p>
-      <div class="actions mono">
-        <a href="/texts/">Read texts</a>
-        <a href="/creations/">Open creations</a>
-      </div>
-    </div>
+<BaseLayout fileLabel="README">
+  <article class="content-area readme-page">
+    <figure class="readme-figure media-frame">
+      <img src="/media/forest-notebook/forest-cover.svg" alt="Botanical cover study" />
+    </figure>
+    <p>Howdy. Magnus here.</p>
+    <p>
+      <strong>MagnusLisleva.tn</strong> is a personal archive for texts, field notes, software,
+      music, photos, and other creations. The structure borrows from code and file browsers, but
+      the subject matter leans toward biology, philosophy, politics, AI, and music.
+    </p>
+    <p>
+      This is the README. <a href="/texts/">Texts</a> holds short and long-form writing.
+      <a href="/creations/">Creations</a> holds media and projects. <a href="/tags/">Tags</a>
+      cuts across both.
+    </p>
 
-    <aside class="card profile">
-      <p class="eyebrow">Magnus Lisleva</p>
-      <p>
-        Mixed writing on biology, philosophy, politics, AI, and music, alongside software,
-        sound, video, and photo-led work.
-      </p>
-      <p>
-        The visual direction is deliberately softer than a code journal: moss tones, editorial
-        spacing, and restrained botanical ornament instead of developer-blog chrome.
-      </p>
-    </aside>
-  </section>
+    <div class="section-title">
+      <h2>Recent Texts</h2>
+    </div>
+    <ul class="readme-list">
+      {recentTexts.map((entry) => <li><a href={`/texts/${entry.slug}/`}>{entry.data.title}</a></li>)}
+    </ul>
 
-  <section class="shell section">
-    <SectionTitle title="Recent Texts" href="/texts/" linkLabel="View all texts" />
-    <div class="stack">
-      {recentTexts.map((entry) => <EntryCard entry={entry} />)}
+    <div class="section-title">
+      <h2>Recent Creations</h2>
     </div>
-  </section>
-
-  <section class="shell section">
-    <SectionTitle title="Recent Creations" href="/creations/" linkLabel="View all creations" />
-    <div class="stack">
-      {recentCreations.map((entry) => <EntryCard entry={entry} />)}
-    </div>
-  </section>
-
-  <section class="shell section info-grid">
-    <div class="card panel">
-      <p class="eyebrow">Structure</p>
-      <p>
-        <strong>Texts</strong> holds short and long-form writing.
-        <strong>Creations</strong> holds music, apps, videos, podcasts, photos, and events.
-      </p>
-    </div>
-    <div class="card panel">
-      <p class="eyebrow">Newsletter</p>
-      <p>
-        Signups go to Mailchimp on the dedicated newsletter page. No timeline feed, no RSS, no
-        search. The site stays quiet and fast on purpose.
-      </p>
-    </div>
-  </section>
+    <ul class="readme-list">
+      {recentCreations.map((entry) => <li><a href={`/creations/${entry.slug}/`}>{entry.data.title}</a></li>)}
+    </ul>
+  </article>
 </BaseLayout>
 
 <style>
-  .home-hero {
+  .readme-page {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 23rem;
-    gap: 1.5rem;
-    padding: 3rem 0 2rem;
-    align-items: end;
+    gap: 1rem;
   }
 
-  .intro {
-    position: relative;
-    padding: 2rem 0 1rem;
+  .readme-figure {
+    margin-bottom: 0.5rem;
   }
 
-  .intro::after {
-    content: "";
-    position: absolute;
-    right: 8%;
-    top: 0;
-    width: 12rem;
-    height: 12rem;
-    border-radius: 60% 40% 52% 48%;
-    background:
-      radial-gradient(circle at 35% 35%, rgba(216, 226, 203, 0.94), rgba(113, 140, 120, 0.36));
-    filter: blur(8px);
-    opacity: 0.85;
-    z-index: -1;
-  }
-
-  h1 {
-    margin: 0.55rem 0 1rem;
-    font-size: clamp(3.6rem, 10vw, 7rem);
-    line-height: 0.92;
-    max-width: 9ch;
-  }
-
-  .lede {
-    max-width: 34rem;
+  .readme-list {
     margin: 0;
-    font-size: 1.16rem;
-    color: var(--text-soft);
-  }
-
-  .actions {
-    display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    margin-top: 1.4rem;
-  }
-
-  .actions a {
-    padding: 0.8rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    background: rgba(255, 255, 255, 0.4);
-  }
-
-  .profile {
-    padding: 1.3rem;
-  }
-
-  .stack {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .panel {
-    padding: 1.2rem;
-  }
-
-  .panel p:last-child {
-    margin-bottom: 0;
-  }
-
-  @media (max-width: 900px) {
-    .home-hero,
-    .info-grid {
-      grid-template-columns: 1fr;
-    }
+    padding-left: 1.2rem;
   }
 </style>

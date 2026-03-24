@@ -1,31 +1,206 @@
 ---
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
+import Navigator from "../components/Navigator.astro";
 import "../styles/global.css";
 import { siteConfig } from "../site.config";
 
 interface Props {
   title?: string;
   description?: string;
+  fileLabel?: string;
 }
 
-const { title, description = siteConfig.description } = Astro.props;
+const { title, description = siteConfig.description, fileLabel } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
+const pathname = Astro.url.pathname;
+const label = fileLabel ?? title ?? "README";
+const buildDate = new Date();
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
   </head>
-  <body class="grain">
-    <Header />
-    <main>
-      <slot />
-    </main>
-    <Footer />
+  <body>
+    <div class="app-shell">
+      <Navigator currentPath={pathname} />
+      <section class="file-shell">
+        <header class="file-header">
+          <h1>{label}</h1>
+          <div class="file-header-actions">
+            <button
+              class="theme-toggle theme-cycle-btn"
+              type="button"
+              aria-label="Cycle site theme"
+              data-theme-toggle
+            >
+              Dark
+            </button>
+          </div>
+        </header>
+        <div class="file-scroll-shell" data-win-scroll-shell>
+          <main class="file-body" data-win-scroll-body>
+            <slot />
+          </main>
+          <aside class="win-scrollbar" aria-hidden="true">
+            <button class="win-scroll-btn win-scroll-up" type="button" data-scroll-up></button>
+            <div class="win-scroll-track" data-scroll-track>
+              <div class="win-scroll-thumb" data-scroll-thumb></div>
+            </div>
+            <button class="win-scroll-btn win-scroll-down" type="button" data-scroll-down></button>
+          </aside>
+        </div>
+        <footer class="file-footer">
+          <div class="file-footer-meta">
+            <span>{buildDate.toLocaleDateString("en-US")}</span>
+            <span>{buildDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
+          </div>
+          <a href="https://github.com/primeid/magnuslisleva-tn" target="_blank" rel="noreferrer">
+            Repository
+          </a>
+        </footer>
+      </section>
+    </div>
+
+    <script is:inline>
+      const root = document.documentElement;
+      const storedTheme = localStorage.getItem("theme");
+      const themeButton = document.querySelector("[data-theme-toggle]");
+      const themeOrder = ["dark", "light", "punk"];
+      const formatThemeLabel = (theme) =>
+        theme ? theme.charAt(0).toUpperCase() + theme.slice(1) : "Theme";
+      const initialTheme =
+        storedTheme === "light" || storedTheme === "dark" || storedTheme === "punk"
+          ? storedTheme
+          : "dark";
+
+      root.setAttribute("data-theme", initialTheme);
+      if (themeButton) themeButton.textContent = formatThemeLabel(initialTheme);
+      themeButton?.addEventListener("animationend", () => {
+        themeButton.classList.remove("theme-spin");
+      });
+
+      themeButton?.addEventListener("click", () => {
+        const currentTheme = root.getAttribute("data-theme");
+        const nextTheme = currentTheme
+          ? themeOrder[(themeOrder.indexOf(currentTheme) + 1) % themeOrder.length]
+          : "dark";
+        root.setAttribute("data-theme", nextTheme);
+        localStorage.setItem("theme", nextTheme);
+        themeButton.textContent = formatThemeLabel(nextTheme);
+        themeButton.classList.remove("theme-spin");
+        void themeButton.offsetWidth;
+        themeButton.classList.add("theme-spin");
+      });
+
+      document.querySelectorAll(".folder").forEach((details) => {
+        if (!(details instanceof HTMLDetailsElement)) return;
+        const folderId = details.dataset.folderId;
+        if (!folderId) return;
+
+        const storedState = localStorage.getItem(`folder:${folderId}`);
+        if (storedState === "open") details.open = true;
+        if (storedState === "closed") details.open = false;
+      });
+
+      document.querySelectorAll(".folder > summary").forEach((summary) => {
+        summary.addEventListener("click", (event) => {
+          event.preventDefault();
+          const details = summary.parentElement;
+          if (details instanceof HTMLDetailsElement) {
+            details.open = !details.open;
+            const folderId = details.dataset.folderId;
+            if (folderId) {
+              localStorage.setItem(`folder:${folderId}`, details.open ? "open" : "closed");
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-win-scroll-shell]").forEach((shell) => {
+        const body = shell.querySelector("[data-win-scroll-body]");
+        const track = shell.querySelector("[data-scroll-track]");
+        const thumb = shell.querySelector("[data-scroll-thumb]");
+        const up = shell.querySelector("[data-scroll-up]");
+        const down = shell.querySelector("[data-scroll-down]");
+
+        if (!(body instanceof HTMLElement)) return;
+        if (!(track instanceof HTMLElement)) return;
+        if (!(thumb instanceof HTMLElement)) return;
+        if (!(up instanceof HTMLButtonElement)) return;
+        if (!(down instanceof HTMLButtonElement)) return;
+
+        let dragOffset = 0;
+        let dragging = false;
+
+        const syncThumb = () => {
+          const maxScroll = body.scrollHeight - body.clientHeight;
+          const trackHeight = track.clientHeight;
+
+          if (maxScroll <= 0 || trackHeight <= 0) {
+            thumb.style.display = "none";
+            return;
+          }
+
+          thumb.style.display = "block";
+          const thumbHeight = Math.max(24, (body.clientHeight / body.scrollHeight) * trackHeight);
+          const maxThumbTop = trackHeight - thumbHeight;
+          const thumbTop = (body.scrollTop / maxScroll) * maxThumbTop;
+
+          thumb.style.height = `${thumbHeight}px`;
+          thumb.style.transform = `translateY(${thumbTop}px)`;
+        };
+
+        const scrollByStep = (delta) => {
+          body.scrollBy({ top: delta, behavior: "auto" });
+        };
+
+        up.addEventListener("click", () => scrollByStep(-56));
+        down.addEventListener("click", () => scrollByStep(56));
+
+        track.addEventListener("click", (event) => {
+          if (event.target === thumb) return;
+          const rect = track.getBoundingClientRect();
+          const clickY = event.clientY - rect.top;
+          const thumbRect = thumb.getBoundingClientRect();
+          const thumbCenter = thumbRect.top - rect.top + thumbRect.height / 2;
+          scrollByStep(clickY < thumbCenter ? -body.clientHeight * 0.9 : body.clientHeight * 0.9);
+        });
+
+        thumb.addEventListener("pointerdown", (event) => {
+          dragging = true;
+          dragOffset = event.clientY - thumb.getBoundingClientRect().top;
+          thumb.setPointerCapture(event.pointerId);
+          event.preventDefault();
+        });
+
+        thumb.addEventListener("pointermove", (event) => {
+          if (!dragging) return;
+          const rect = track.getBoundingClientRect();
+          const thumbHeight = thumb.getBoundingClientRect().height;
+          const maxThumbTop = rect.height - thumbHeight;
+          const nextTop = Math.min(Math.max(0, event.clientY - rect.top - dragOffset), maxThumbTop);
+          const ratio = maxThumbTop > 0 ? nextTop / maxThumbTop : 0;
+          const maxScroll = body.scrollHeight - body.clientHeight;
+          body.scrollTop = ratio * maxScroll;
+        });
+
+        const stopDragging = (event) => {
+          dragging = false;
+          if (thumb.hasPointerCapture(event.pointerId)) {
+            thumb.releasePointerCapture(event.pointerId);
+          }
+        };
+
+        thumb.addEventListener("pointerup", stopDragging);
+        thumb.addEventListener("pointercancel", stopDragging);
+        body.addEventListener("scroll", syncThumb, { passive: true });
+        window.addEventListener("resize", syncThumb);
+        syncThumb();
+      });
+    </script>
   </body>
 </html>
