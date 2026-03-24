@@ -139,40 +139,25 @@ const label = fileLabel ?? title ?? "README";
         themeButton.classList.add("theme-spin");
       });
 
-      document.querySelectorAll(".folder").forEach((folder) => {
-        if (!(folder instanceof HTMLElement)) return;
-        const folderId = folder.dataset.folderId;
-        if (!folderId) return;
-
-        const storedState = sessionStorage.getItem(`folder:${folderId}`);
-        const isOpen = storedState === "open";
-        folder.classList.toggle("is-open", isOpen);
-      });
-
       document.querySelectorAll("[data-folder-link]").forEach((link) => {
         if (!(link instanceof HTMLAnchorElement)) return;
         link.addEventListener("click", (event) => {
           const folder = link.closest(".folder");
           if (folder instanceof HTMLElement) {
-            const folderId = folder.dataset.folderId;
             const href = link.getAttribute("href");
             const onFolderIndex = href ? window.location.pathname === href : false;
             const isOpen = folder.classList.contains("is-open");
 
             if (!isOpen) {
               folder.classList.add("is-open");
-              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
               return;
             }
 
             if (onFolderIndex) {
               event.preventDefault();
               folder.classList.remove("is-open");
-              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "closed");
               return;
             }
-
-            if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
           }
         });
       });
