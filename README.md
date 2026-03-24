@@ -44,9 +44,14 @@ For the Debian LXC deployment target, the clean first version is:
 2. Serve `dist/` through `nginx` or `caddy`.
 3. Add GitHub Actions once the container exists.
 
-## GitHub Actions deploy secrets
+## GitHub Actions
 
-The repository includes `.github/workflows/deploy.yml`.
+The repository includes:
+
+- `.github/workflows/ci.yml` for build and verification on every push to `main`
+- `.github/workflows/deploy-manual.yml` for manual SSH deployment once the LXC target is ready
+
+## Deployment secrets
 
 Set these repository secrets when the LXC target is ready:
 
