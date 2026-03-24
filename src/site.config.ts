@@ -5,6 +5,10 @@ export const siteConfig = {
   mailchimpAction: "",
   socialLinks: [
     {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/magnuslislevatn/",
+    },
+    {
       label: "X",
       href: "https://x.com/LislevatnMagnus",
     },

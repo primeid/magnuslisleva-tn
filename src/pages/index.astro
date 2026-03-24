@@ -1,64 +1,76 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getPublishedCreations, getPublishedTexts } from "../lib/content";
-
-const texts = getPublishedTexts();
-const creations = getPublishedCreations();
-const recentTexts = texts.slice(0, 4);
-const recentCreations = creations.slice(0, 4);
-const featuredImage =
-  texts.find((entry) => entry.data.cover)?.data.cover ?? "/earth-mark.svg";
+import { siteConfig } from "../site.config";
 ---
 
 <BaseLayout fileLabel="README">
-  <article class="content-area readme-page">
-    <figure class="readme-figure media-frame">
-      <img src={featuredImage} alt="Featured essay image" />
+  <article class="content-area about-page">
+    <figure class="about-figure media-frame">
+      <img
+        src="/media/about/magnus-profile.gif"
+        alt="Pixelated portrait of Magnus Lislevatn"
+        loading="eager"
+      />
     </figure>
-    <p>Howdy. Magnus here.</p>
-    <p>
-      <strong>MagnusLisleva.tn</strong> is a personal archive for texts, field notes, software,
-      music, photos, and other creations. The structure borrows from code and file browsers, but
-      the subject matter leans toward biology, philosophy, politics, AI, and music.
-    </p>
-    <p>
-      This is the README. <a href="/texts/">Texts</a> holds short and long-form writing.
-      <a href="/creations/">Creations</a> holds media and projects. <a href="/tags/">Tags</a>
-      cuts across both.
-    </p>
-
-    <div class="section-title">
-      <h2>Recent Texts</h2>
-    </div>
-    <ul class="readme-list">
-      {recentTexts.map((entry) => <li><a href={`/texts/${entry.slug}/`}>{entry.data.title}</a></li>)}
-    </ul>
-
-    <div class="section-title">
-      <h2>Recent Creations</h2>
-    </div>
-    <ul class="readme-list">
-      {
-        recentCreations.length > 0
-          ? recentCreations.map((entry) => <li><a href={`/creations/${entry.slug}/`}>{entry.data.title}</a></li>)
-          : <li>No creations published yet.</li>
-      }
+    <ul class="about-socials" aria-label="Social media accounts">
+      {siteConfig.socialLinks.map((link) => (
+        <li><a href={link.href} target="_blank" rel="noreferrer">{link.label}</a></li>
+      ))}
     </ul>
   </article>
 </BaseLayout>
 
 <style>
-  .readme-page {
+  .about-page {
+    min-height: 100%;
     display: grid;
-    gap: 1rem;
+    align-content: center;
+    justify-items: center;
+    gap: 1.25rem;
   }
 
-  .readme-figure {
-    margin-bottom: 0.5rem;
-  }
-
-  .readme-list {
+  .about-figure {
+    width: min(100%, 25rem);
     margin: 0;
-    padding-left: 1.2rem;
+  }
+
+  .about-figure img {
+    width: 100%;
+    aspect-ratio: 17 / 23;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+
+  .about-socials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+
+  .about-socials a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.28rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--panel-2) 90%, transparent 10%);
+    text-decoration: none;
+  }
+
+  .about-socials a:hover {
+    border-color: var(--line-strong);
+    color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent-soft) 72%, var(--panel) 28%);
+  }
+
+  @media (max-width: 720px) {
+    .about-page {
+      align-content: start;
+    }
   }
 </style>
