@@ -1,0 +1,303 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Space Invaders" description="Classic space invaders game." fileLabel="Space Invaders">
+  <section class="content-area game-page">
+    <p>Arrow keys to move, space to shoot. Tap sides to move on mobile, tap center to shoot.</p>
+    <div class="game-shell media-frame">
+      <canvas
+        class="invaders-board"
+        width="384"
+        height="448"
+        aria-label="Space Invaders game board"
+        data-invaders-board
+      ></canvas>
+      <div class="game-meta mono">
+        <span data-invaders-score>Score 0</span>
+        <span data-invaders-lives>Lives 3</span>
+        <span data-invaders-status>Press space</span>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const canvas = document.querySelector("[data-invaders-board]");
+    const scoreNode = document.querySelector("[data-invaders-score]");
+    const livesNode = document.querySelector("[data-invaders-lives]");
+    const statusNode = document.querySelector("[data-invaders-status]");
+
+    if (canvas instanceof HTMLCanvasElement) {
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+      const rootStyles = getComputedStyle(document.documentElement);
+
+      const palette = () => ({
+        bg: rootStyles.getPropertyValue("--panel").trim() || "#101511",
+        grid: rootStyles.getPropertyValue("--line").trim() || "#2a3a2d",
+        player: rootStyles.getPropertyValue("--accent").trim() || "#8bb49a",
+        invader: rootStyles.getPropertyValue("--accent-strong").trim() || "#d5f6d7",
+        bullet: rootStyles.getPropertyValue("--text").trim() || "#e8ede7",
+        enemyBullet: rootStyles.getPropertyValue("--text-soft").trim() || "#9fb0a3",
+      });
+
+      const PLAYER_W = 28;
+      const PLAYER_H = 16;
+      const INV_W = 22;
+      const INV_H = 14;
+      const INV_COLS = 8;
+      const INV_ROWS = 4;
+      const INV_PAD_X = 10;
+      const INV_PAD_Y = 8;
+      const BULLET_W = 3;
+      const BULLET_H = 10;
+
+      let player, bullets, enemyBullets, invaders, invDx, invDropNext;
+      let moveTimer, shootTimer, enemyShootTimer;
+      let score, lives, running, gameOver, wave;
+
+      const initState = () => {
+        player = { x: W / 2 - PLAYER_W / 2, y: H - 36 };
+        bullets = [];
+        enemyBullets = [];
+        invaders = [];
+        invDx = 1.2;
+        invDropNext = false;
+        moveTimer = 0;
+        shootTimer = 0;
+        enemyShootTimer = 0;
+        score = 0;
+        lives = 3;
+        running = false;
+        gameOver = false;
+        wave = 1;
+        spawnWave();
+      };
+
+      const spawnWave = () => {
+        invaders = [];
+        const offsetX = (W - (INV_COLS * (INV_W + INV_PAD_X) - INV_PAD_X)) / 2;
+        for (let r = 0; r < INV_ROWS; r++) {
+          for (let c = 0; c < INV_COLS; c++) {
+            invaders.push({
+              x: offsetX + c * (INV_W + INV_PAD_X),
+              y: 40 + r * (INV_H + INV_PAD_Y),
+              alive: true,
+              type: r,
+            });
+          }
+        }
+        invDx = (1.2 + (wave - 1) * 0.3) * (invDx > 0 ? 1 : -1);
+      };
+
+      const keys = {};
+      window.addEventListener("keydown", (e) => {
+        keys[e.key] = true;
+        if (e.key === " ") {
+          e.preventDefault();
+          if (!running && !gameOver) { running = true; updateMeta(); }
+          else if (gameOver) { initState(); running = true; updateMeta(); }
+        }
+      });
+      window.addEventListener("keyup", (e) => { keys[e.key] = false; });
+
+      let touchLeft = false;
+      let touchRight = false;
+      let touchShoot = false;
+
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (!running && !gameOver) { running = true; updateMeta(); return; }
+        if (gameOver) { initState(); running = true; updateMeta(); return; }
+        for (const t of e.touches) {
+          const rect = canvas.getBoundingClientRect();
+          const tx = (t.clientX - rect.left) / rect.width;
+          if (tx < 0.3) touchLeft = true;
+          else if (tx > 0.7) touchRight = true;
+          else touchShoot = true;
+        }
+      }, { passive: false });
+
+      canvas.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        touchLeft = false;
+        touchRight = false;
+        touchShoot = false;
+      }, { passive: false });
+
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      const updateMeta = () => {
+        if (scoreNode) scoreNode.textContent = `Score ${score}`;
+        if (livesNode) livesNode.textContent = `Lives ${lives}`;
+        if (statusNode) statusNode.textContent = gameOver ? "Game over" : running ? `Wave ${wave}` : "Press space";
+      };
+
+      const drawPlayer = (c) => {
+        ctx.fillStyle = c.player;
+        ctx.fillRect(player.x, player.y, PLAYER_W, PLAYER_H);
+        ctx.fillRect(player.x + PLAYER_W / 2 - 2, player.y - 5, 4, 5);
+      };
+
+      const drawInvader = (inv, c) => {
+        const colors = [c.invader, c.player, c.enemyBullet, c.invader];
+        ctx.fillStyle = colors[inv.type] || c.invader;
+        ctx.fillRect(inv.x, inv.y, INV_W, INV_H);
+        ctx.fillRect(inv.x + 2, inv.y - 3, 4, 3);
+        ctx.fillRect(inv.x + INV_W - 6, inv.y - 3, 4, 3);
+        ctx.fillRect(inv.x + 4, inv.y + INV_H, 4, 3);
+        ctx.fillRect(inv.x + INV_W - 8, inv.y + INV_H, 4, 3);
+      };
+
+      const paint = () => {
+        const c = palette();
+        ctx.fillStyle = c.bg;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = c.grid;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 6]);
+        ctx.beginPath();
+        ctx.moveTo(0, H - 50);
+        ctx.lineTo(W, H - 50);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (!gameOver) drawPlayer(c);
+
+        invaders.forEach((inv) => { if (inv.alive) drawInvader(inv, c); });
+
+        ctx.fillStyle = c.bullet;
+        bullets.forEach((b) => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
+
+        ctx.fillStyle = c.enemyBullet;
+        enemyBullets.forEach((b) => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
+
+        if (!running && !gameOver) {
+          ctx.fillStyle = c.player;
+          ctx.font = "14px 'IBM Plex Mono', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("PRESS SPACE OR TAP TO START", W / 2, H / 2);
+        }
+      };
+
+      const collides = (ax, ay, aw, ah, bx, by, bw, bh) =>
+        ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+
+      const tick = () => {
+        if (!running || gameOver) { paint(); return; }
+
+        const speed = 4;
+        if (keys["ArrowLeft"] || keys["a"] || keys["A"] || touchLeft) {
+          player.x = Math.max(0, player.x - speed);
+        }
+        if (keys["ArrowRight"] || keys["d"] || keys["D"] || touchRight) {
+          player.x = Math.min(W - PLAYER_W, player.x + speed);
+        }
+
+        shootTimer++;
+        if ((keys[" "] || touchShoot) && shootTimer > 12) {
+          bullets.push({ x: player.x + PLAYER_W / 2 - 1, y: player.y - BULLET_H });
+          shootTimer = 0;
+        }
+
+        bullets = bullets.filter((b) => { b.y -= 6; return b.y > -BULLET_H; });
+        enemyBullets = enemyBullets.filter((b) => { b.y += 3.5; return b.y < H; });
+
+        let hitEdge = false;
+        const aliveInvaders = invaders.filter((inv) => inv.alive);
+
+        aliveInvaders.forEach((inv) => {
+          inv.x += invDx;
+          if (inv.x <= 0 || inv.x + INV_W >= W) hitEdge = true;
+        });
+
+        if (hitEdge) {
+          invDx = -invDx;
+          aliveInvaders.forEach((inv) => { inv.y += 12; });
+        }
+
+        enemyShootTimer++;
+        if (enemyShootTimer > 60 && aliveInvaders.length > 0) {
+          const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
+          enemyBullets.push({ x: shooter.x + INV_W / 2, y: shooter.y + INV_H });
+          enemyShootTimer = 0;
+        }
+
+        bullets.forEach((b) => {
+          invaders.forEach((inv) => {
+            if (inv.alive && collides(b.x, b.y, BULLET_W, BULLET_H, inv.x, inv.y, INV_W, INV_H)) {
+              inv.alive = false;
+              b.y = -100;
+              score += (4 - inv.type) * 10;
+            }
+          });
+        });
+
+        enemyBullets.forEach((b) => {
+          if (collides(b.x, b.y, BULLET_W, BULLET_H, player.x, player.y, PLAYER_W, PLAYER_H)) {
+            b.y = H + 100;
+            lives--;
+            if (lives <= 0) { gameOver = true; running = false; }
+          }
+        });
+
+        aliveInvaders.forEach((inv) => {
+          if (inv.y + INV_H >= player.y) {
+            gameOver = true;
+            running = false;
+          }
+        });
+
+        if (invaders.every((inv) => !inv.alive)) {
+          wave++;
+          spawnWave();
+          bullets = [];
+          enemyBullets = [];
+        }
+
+        updateMeta();
+        paint();
+      };
+
+      initState();
+      updateMeta();
+      paint();
+      window.setInterval(tick, 1000 / 30);
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .game-page {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .game-shell {
+    width: min(100%, 28rem);
+    padding: 0.9rem;
+  }
+
+  .invaders-board {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--line);
+    background: #101511;
+    image-rendering: pixelated;
+    touch-action: none;
+  }
+
+  .game-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+</style>

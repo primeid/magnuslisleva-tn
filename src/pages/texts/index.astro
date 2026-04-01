@@ -13,9 +13,11 @@ const grouped = groupEntriesByYear(texts);
       Short notes and longer essays live here. This replaces the notes and stories split with one
       continuous text archive.
     </p>
-    <div class="years mono">
-      {Object.keys(grouped).map((year) => <a href={`/texts/archive/${year}/`}>{year}</a>)}
-    </div>
+    {Object.keys(grouped).length > 1 && (
+      <div class="years mono">
+        {Object.keys(grouped).map((year) => <a href={`/texts/archive/${year}/`}>{year}</a>)}
+      </div>
+    )}
     {Object.entries(grouped).map(([year, entries]) => <ArchiveGroup year={year} entries={entries} />)}
   </section>
 </BaseLayout>

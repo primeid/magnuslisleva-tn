@@ -93,17 +93,61 @@ const isNewsletter = currentPath.startsWith("/newsletter");
         </ol>
       </div>
 
+      <div class="folder" data-folder-id="games">
+        <a
+          class:list={["directory-link", "folder-link", { active: currentPath === "/games/" }]}
+          href="/games/"
+          data-folder-link
+        >
+          <span class="directory-icon">DIR</span>
+          <span class="folder-caret folder-caret-inline" aria-hidden="true"></span>
+          <strong>Games</strong>
+        </a>
+        <ol>
+          <li>
+            <a
+              href="/games/snake/"
+              class={currentPath === "/games/snake/" ? "active-leaf" : undefined}
+            >
+              <span class="directory-icon">EXE</span>
+              <strong>Snake</strong>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/games/space-invaders/"
+              class={currentPath === "/games/space-invaders/" ? "active-leaf" : undefined}
+            >
+              <span class="directory-icon">EXE</span>
+              <strong>Space Invaders</strong>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/games/tamagotchi/"
+              class={currentPath === "/games/tamagotchi/" ? "active-leaf" : undefined}
+            >
+              <span class="directory-icon">EXE</span>
+              <strong>Tamagotchi</strong>
+            </a>
+          </li>
+          <li>
+            <a
+              href="/games/breakout/"
+              class={currentPath === "/games/breakout/" ? "active-leaf" : undefined}
+            >
+              <span class="directory-icon">EXE</span>
+              <strong>Breakout</strong>
+            </a>
+          </li>
+        </ol>
+      </div>
+
       <ul>
         <li>
           <a class:list={["directory-link", { active: isNewsletter }]} href="/newsletter/">
             <span class="directory-icon">MAIL</span>
             <strong>Newsletter</strong>
-          </a>
-        </li>
-        <li>
-          <a class:list={["directory-link", { active: isGames }]} href="/games/">
-            <span class="directory-icon">EXE</span>
-            <strong>Games</strong>
           </a>
         </li>
         <li>

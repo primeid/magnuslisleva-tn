@@ -31,7 +31,17 @@ const label = fileLabel ?? title ?? "README";
       <Navigator currentPath={pathname} />
       <section class="file-shell">
         <header class="file-header">
-          <h1>{label}</h1>
+          <div class="file-header-left">
+            <button
+              class="mobile-menu-btn"
+              type="button"
+              aria-label="Toggle navigation"
+              data-mobile-menu-toggle
+            >
+              <span class="menu-icon" aria-hidden="true"></span>
+            </button>
+            <h1>{label}</h1>
+          </div>
           <div class="file-header-actions">
             <button
               class="theme-toggle theme-cycle-btn"
@@ -60,10 +70,11 @@ const label = fileLabel ?? title ?? "README";
             <span data-clock-utc-date>UTC ----/--/--</span>
             <span data-clock-utc-time>UTC --:--:--</span>
             <span data-clock-moon>MTC --:--:--</span>
+            <a class="footer-source-link" href="https://github.com/primeid/magnuslisleva-tn" target="_blank" rel="noreferrer">
+              <span class="footer-source-full">Open sourced code</span>
+              <span class="footer-source-short">Source</span>
+            </a>
           </div>
-          <a href="https://github.com/primeid/magnuslisleva-tn" target="_blank" rel="noreferrer">
-            Open sourced code
-          </a>
         </footer>
       </section>
     </div>
@@ -144,6 +155,26 @@ const label = fileLabel ?? title ?? "README";
         themeButton.classList.add("theme-spin");
       });
 
+      const mobileMenuBtn = document.querySelector("[data-mobile-menu-toggle]");
+      const navigatorShell = document.querySelector(".navigator-shell");
+      const appShell = document.querySelector(".app-shell");
+
+      mobileMenuBtn?.addEventListener("click", () => {
+        const isOpen = appShell?.classList.toggle("mobile-nav-open");
+        mobileMenuBtn.setAttribute("aria-expanded", String(!!isOpen));
+      });
+
+      navigatorShell?.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLAnchorElement)) return;
+        const href = target.getAttribute("href");
+        if (!href || href.startsWith("#")) return;
+        const isFolder = target.hasAttribute("data-folder-link");
+        if (isFolder) return;
+        appShell?.classList.remove("mobile-nav-open");
+        mobileMenuBtn?.setAttribute("aria-expanded", "false");
+      });
+
       const navigationEntry = performance.getEntriesByType("navigation")[0];
       if (navigationEntry && "type" in navigationEntry && navigationEntry.type === "reload") {
         Object.keys(sessionStorage)
@@ -164,29 +195,12 @@ const label = fileLabel ?? title ?? "README";
       document.querySelectorAll("[data-folder-link]").forEach((link) => {
         if (!(link instanceof HTMLAnchorElement)) return;
         link.addEventListener("click", (event) => {
+          event.preventDefault();
           const folder = link.closest(".folder");
           if (folder instanceof HTMLElement) {
             const folderId = folder.dataset.folderId;
-            const href = link.getAttribute("href");
-            const onFolderIndex = href
-              ? normalizePath(window.location.pathname) === normalizePath(href)
-              : false;
-            const isOpen = folder.classList.contains("is-open");
-
-            if (!isOpen) {
-              folder.classList.add("is-open");
-              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
-              return;
-            }
-
-            if (onFolderIndex) {
-              event.preventDefault();
-              folder.classList.remove("is-open");
-              if (folderId) sessionStorage.setItem(`folder:${folderId}`, "closed");
-              return;
-            }
-
-            if (folderId) sessionStorage.setItem(`folder:${folderId}`, "open");
+            const isOpen = folder.classList.toggle("is-open");
+            if (folderId) sessionStorage.setItem(`folder:${folderId}`, isOpen ? "open" : "closed");
           }
         });
       });

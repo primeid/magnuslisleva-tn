@@ -2,6 +2,8 @@
 
 Static Astro site for `MagnusLisleva.tn`.
 
+Site design inspired by [Robin Rendle](https://robinrendle.com/).
+
 ## Commands
 
 ```bash

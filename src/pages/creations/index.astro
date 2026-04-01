@@ -16,9 +16,11 @@ const grouped = groupEntriesByYear(creations);
     {
       creations.length > 0 ? (
         <>
-          <div class="years mono">
-            {Object.keys(grouped).map((year) => <a href={`/creations/archive/${year}/`}>{year}</a>)}
-          </div>
+          {Object.keys(grouped).length > 1 && (
+            <div class="years mono">
+              {Object.keys(grouped).map((year) => <a href={`/creations/archive/${year}/`}>{year}</a>)}
+            </div>
+          )}
           {Object.entries(grouped).map(([year, entries]) => <ArchiveGroup year={year} entries={entries} />)}
         </>
       ) : (

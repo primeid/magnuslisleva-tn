@@ -1,0 +1,329 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Tamagotchi" description="A virtual pet to care for." fileLabel="Tamagotchi">
+  <section class="content-area game-page">
+    <p>Feed, play, and rest your pet. Keep all stats above zero or it will leave.</p>
+    <div class="game-shell media-frame">
+      <canvas
+        class="tama-board"
+        width="384"
+        height="320"
+        aria-label="Tamagotchi game"
+        data-tama-board
+      ></canvas>
+      <div class="game-controls">
+        <button class="game-btn mono" data-tama-feed>Feed</button>
+        <button class="game-btn mono" data-tama-play>Play</button>
+        <button class="game-btn mono" data-tama-rest>Rest</button>
+        <button class="game-btn mono" data-tama-clean>Clean</button>
+      </div>
+      <div class="game-meta mono">
+        <span data-tama-age>Age 0</span>
+        <span data-tama-status>Idle</span>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const canvas = document.querySelector("[data-tama-board]");
+    const ageNode = document.querySelector("[data-tama-age]");
+    const statusNode = document.querySelector("[data-tama-status]");
+
+    if (canvas instanceof HTMLCanvasElement) {
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+      const rootStyles = getComputedStyle(document.documentElement);
+
+      const palette = () => ({
+        bg: rootStyles.getPropertyValue("--panel").trim() || "#101511",
+        line: rootStyles.getPropertyValue("--line").trim() || "#2a3a2d",
+        accent: rootStyles.getPropertyValue("--accent").trim() || "#8bb49a",
+        strong: rootStyles.getPropertyValue("--accent-strong").trim() || "#d5f6d7",
+        soft: rootStyles.getPropertyValue("--text-soft").trim() || "#9fb0a3",
+        text: rootStyles.getPropertyValue("--text").trim() || "#e8ede7",
+        panel2: rootStyles.getPropertyValue("--panel-2").trim() || "#1a231d",
+      });
+
+      let hunger = 80;
+      let happiness = 80;
+      let energy = 80;
+      let hygiene = 80;
+      let age = 0;
+      let alive = true;
+      let mood = "happy";
+      let animFrame = 0;
+      let actionAnim = "";
+      let actionTimer = 0;
+      let tickCount = 0;
+
+      const clamp = (v) => Math.max(0, Math.min(100, v));
+
+      const updateMood = () => {
+        if (!alive) { mood = "gone"; return; }
+        const avg = (hunger + happiness + energy + hygiene) / 4;
+        if (avg > 70) mood = "happy";
+        else if (avg > 40) mood = "neutral";
+        else if (avg > 20) mood = "sad";
+        else mood = "sick";
+      };
+
+      const drawBar = (x, y, w, h, value, color) => {
+        const c = palette();
+        ctx.fillStyle = c.panel2;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = c.line;
+        ctx.strokeRect(x, y, w, h);
+        ctx.fillStyle = color;
+        ctx.fillRect(x + 1, y + 1, (w - 2) * (value / 100), h - 2);
+      };
+
+      const drawPet = (cx, cy) => {
+        const c = palette();
+        const bounce = Math.sin(animFrame * 0.15) * 3;
+        const py = cy + bounce;
+
+        if (!alive) {
+          ctx.fillStyle = c.soft;
+          ctx.font = "13px 'IBM Plex Mono', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("Your pet has left...", cx, cy);
+          ctx.fillText("Refresh to try again", cx, cy + 20);
+          return;
+        }
+
+        ctx.fillStyle = c.accent;
+        ctx.beginPath();
+        ctx.ellipse(cx, py, 32, 28, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = c.strong;
+        ctx.beginPath();
+        ctx.ellipse(cx, py - 2, 26, 22, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const eyeY = py - 6;
+        ctx.fillStyle = c.bg;
+        if (mood === "happy") {
+          ctx.fillRect(cx - 12, eyeY, 5, 5);
+          ctx.fillRect(cx + 7, eyeY, 5, 5);
+          ctx.fillStyle = c.accent;
+          ctx.fillRect(cx - 6, eyeY + 8, 12, 2);
+          ctx.fillRect(cx - 4, eyeY + 10, 8, 2);
+        } else if (mood === "neutral") {
+          ctx.fillRect(cx - 12, eyeY, 5, 5);
+          ctx.fillRect(cx + 7, eyeY, 5, 5);
+          ctx.fillStyle = c.accent;
+          ctx.fillRect(cx - 5, eyeY + 9, 10, 2);
+        } else if (mood === "sad") {
+          ctx.fillRect(cx - 12, eyeY + 2, 5, 5);
+          ctx.fillRect(cx + 7, eyeY + 2, 5, 5);
+          ctx.fillStyle = c.accent;
+          ctx.fillRect(cx - 4, eyeY + 12, 8, 2);
+          ctx.fillRect(cx - 6, eyeY + 10, 12, 2);
+        } else {
+          ctx.fillRect(cx - 12, eyeY + 2, 8, 2);
+          ctx.fillRect(cx + 5, eyeY + 2, 8, 2);
+          ctx.fillStyle = c.accent;
+          ctx.fillRect(cx - 4, eyeY + 12, 8, 2);
+          ctx.fillRect(cx - 6, eyeY + 10, 12, 2);
+        }
+
+        ctx.fillStyle = c.accent;
+        ctx.fillRect(cx - 22, py + 16, 8, 10);
+        ctx.fillRect(cx + 14, py + 16, 8, 10);
+
+        if (actionAnim === "feed") {
+          ctx.fillStyle = c.strong;
+          ctx.fillRect(cx + 28, py - 10 + Math.sin(animFrame * 0.3) * 2, 8, 8);
+          ctx.fillRect(cx + 30, py - 14 + Math.sin(animFrame * 0.3) * 2, 4, 4);
+        } else if (actionAnim === "play") {
+          ctx.fillStyle = c.strong;
+          const starY = py - 30 + Math.sin(animFrame * 0.4) * 4;
+          ctx.beginPath();
+          ctx.arc(cx, starY, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(cx - 16, starY + 5, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(cx + 16, starY + 5, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (actionAnim === "rest") {
+          ctx.fillStyle = c.soft;
+          ctx.font = "16px 'IBM Plex Mono', monospace";
+          ctx.textAlign = "center";
+          const zzOff = Math.sin(animFrame * 0.2) * 3;
+          ctx.fillText("z", cx + 24, py - 20 + zzOff);
+          ctx.fillText("Z", cx + 32, py - 32 + zzOff);
+          ctx.fillText("z", cx + 40, py - 44 + zzOff);
+        } else if (actionAnim === "clean") {
+          ctx.strokeStyle = c.soft;
+          ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++) {
+            const sparkX = cx - 30 + i * 15 + Math.sin(animFrame * 0.3 + i) * 4;
+            const sparkY = py + 20 - Math.abs(Math.sin(animFrame * 0.2 + i)) * 10;
+            ctx.beginPath();
+            ctx.arc(sparkX, sparkY, 2, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      };
+
+      const paint = () => {
+        const c = palette();
+        ctx.fillStyle = c.bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const barW = 70;
+        const barH = 10;
+        const barX = W - barW - 20;
+        const barStartY = 18;
+        const barGap = 18;
+
+        ctx.fillStyle = c.soft;
+        ctx.font = "11px 'IBM Plex Mono', monospace";
+        ctx.textAlign = "right";
+
+        ctx.fillText("HGR", barX - 6, barStartY + 9);
+        drawBar(barX, barStartY, barW, barH, hunger, c.accent);
+
+        ctx.fillText("HAP", barX - 6, barStartY + barGap + 9);
+        drawBar(barX, barStartY + barGap, barW, barH, happiness, c.strong);
+
+        ctx.fillText("NRG", barX - 6, barStartY + barGap * 2 + 9);
+        drawBar(barX, barStartY + barGap * 2, barW, barH, energy, c.soft);
+
+        ctx.fillText("HYG", barX - 6, barStartY + barGap * 3 + 9);
+        drawBar(barX, barStartY + barGap * 3, barW, barH, hygiene, c.accent);
+
+        drawPet(W / 2 - 30, H / 2 + 20);
+
+        if (actionAnim && actionTimer > 0) {
+          ctx.fillStyle = c.soft;
+          ctx.font = "12px 'IBM Plex Mono', monospace";
+          ctx.textAlign = "center";
+          const labels = { feed: "Feeding...", play: "Playing!", rest: "Resting...", clean: "Cleaning!" };
+          ctx.fillText(labels[actionAnim] || "", W / 2 - 30, H - 30);
+        }
+      };
+
+      const doAction = (action) => {
+        if (!alive) return;
+        actionAnim = action;
+        actionTimer = 45;
+
+        if (action === "feed") { hunger = clamp(hunger + 20); energy = clamp(energy - 3); }
+        else if (action === "play") { happiness = clamp(happiness + 20); hunger = clamp(hunger - 8); energy = clamp(energy - 10); }
+        else if (action === "rest") { energy = clamp(energy + 25); hunger = clamp(hunger - 5); hygiene = clamp(hygiene - 5); }
+        else if (action === "clean") { hygiene = clamp(hygiene + 25); happiness = clamp(happiness + 5); }
+
+        updateMood();
+      };
+
+      document.querySelector("[data-tama-feed]")?.addEventListener("click", () => doAction("feed"));
+      document.querySelector("[data-tama-play]")?.addEventListener("click", () => doAction("play"));
+      document.querySelector("[data-tama-rest]")?.addEventListener("click", () => doAction("rest"));
+      document.querySelector("[data-tama-clean]")?.addEventListener("click", () => doAction("clean"));
+
+      const gameTick = () => {
+        animFrame++;
+        tickCount++;
+
+        if (actionTimer > 0) actionTimer--;
+        if (actionTimer === 0) actionAnim = "";
+
+        if (alive && tickCount % 30 === 0) {
+          hunger = clamp(hunger - 1.5);
+          happiness = clamp(happiness - 1);
+          energy = clamp(energy - 0.8);
+          hygiene = clamp(hygiene - 0.7);
+          updateMood();
+        }
+
+        if (alive && tickCount % 300 === 0) {
+          age++;
+        }
+
+        if (alive && (hunger <= 0 || happiness <= 0 || energy <= 0 || hygiene <= 0)) {
+          alive = false;
+          mood = "gone";
+        }
+
+        if (ageNode) ageNode.textContent = `Age ${age}`;
+        if (statusNode) {
+          if (!alive) statusNode.textContent = "Gone";
+          else if (actionAnim) statusNode.textContent = actionAnim.charAt(0).toUpperCase() + actionAnim.slice(1) + "ing";
+          else statusNode.textContent = mood.charAt(0).toUpperCase() + mood.slice(1);
+        }
+
+        paint();
+      };
+
+      updateMood();
+      paint();
+      window.setInterval(gameTick, 1000 / 15);
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .game-page {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .game-shell {
+    width: min(100%, 28rem);
+    padding: 0.9rem;
+  }
+
+  .tama-board {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--line);
+    background: #101511;
+    touch-action: none;
+  }
+
+  .game-controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+  }
+
+  .game-btn {
+    padding: 0.5rem 0.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: center;
+    touch-action: manipulation;
+  }
+
+  .game-btn:hover {
+    border-color: var(--line-strong);
+    background: var(--accent-soft);
+  }
+
+  .game-btn:active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .game-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+</style>
