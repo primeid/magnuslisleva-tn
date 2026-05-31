@@ -10,6 +10,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
     <div class="signup">
       <form id="newsletter-form" novalidate>
+        <!-- Honeypot (invisible to humans, traps bots) -->
+        <div style="display: none;" aria-hidden="true">
+          <input type="text" name="b_honeypot" tabindex="-1" value="" autocomplete="off" />
+        </div>
+
         <label for="email" class="mono">Email Address</label>
         <div class="input-wrapper">
           <input id="email" type="email" name="email" required placeholder="you@example.com" />
@@ -50,8 +55,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       showStatus("Subscribing...", "loading");
 
       try {
-        const formData = new FormData();
-        formData.append("email", email);
+        const formData = new FormData(form);
 
         const response = await fetch("/api/subscribe", {
           method: "POST",

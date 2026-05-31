@@ -6,6 +6,16 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const data = await request.formData();
     const email = data.get("email");
+    const honeypot = data.get("b_honeypot");
+
+    // Honeypot check (prevent automated bot spam)
+    if (honeypot && typeof honeypot === "string" && honeypot.length > 0) {
+      console.warn("Spam bot submission trapped in honeypot.");
+      return new Response(
+        JSON.stringify({ success: true, message: "Thank you for subscribing! Please check your inbox to confirm." }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return new Response(
@@ -31,6 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
       },
       body: JSON.stringify({
         email: email.trim(),
+        check_spam: true,
         metadata: {
           referrer: "website_signup_form"
         }
