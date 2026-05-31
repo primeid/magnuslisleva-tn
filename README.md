@@ -1,6 +1,6 @@
-# MagnusLisleva.tn
+# magnuslislevatn.com
 
-Static Astro site for `MagnusLisleva.tn`.
+Static Astro site in hybrid mode for `magnuslislevatn.com`.
 
 Site design inspired by [Robin Rendle](https://robinrendle.com/).
 
@@ -36,30 +36,36 @@ Add a new creation:
 
 ## Newsletter
 
-Set `mailchimpAction` in `src/site.config.ts` to your Mailchimp form action URL.
+The blog uses **Buttondown** for the mailing list.
+Subscribers are registered securely via the server-side API endpoint `/api/subscribe` without exposing your API token to the client.
 
-## Next infra step
+To configure the newsletter:
+1. Store your Buttondown API key in Fly.io secrets as `BUTTONDOWN_API_KEY`.
+2. Use the provided `buttondown-email-template.html` design in your Buttondown custom template settings to match the blog's theme.
 
-For the Debian LXC deployment target, the clean first version is:
+## Deployment on Fly.io
 
-1. Build static files with `npm run build`.
-2. Serve `dist/` through `nginx` or `caddy`.
-3. Add GitHub Actions once the container exists.
+The application runs in **hybrid** SSR mode on **Fly.io** using Node.js.
+It is automatically built and deployed on every push to `main` via GitHub Actions.
 
-## GitHub Actions
+### Setup and Manual Deploy
+
+1. Make sure you have `flyctl` installed:
+   ```bash
+   curl -L https://fly.io/install.sh | sh
+   ```
+2. Deploy the application:
+   ```bash
+   fly deploy
+   ```
+
+### GitHub Actions
 
 The repository includes:
+- `.github/workflows/ci.yml` for build and code verification on every push to `main`.
+- `.github/workflows/deploy.yml` for automatic Fly.io deployment on every push to `main`.
 
-- `.github/workflows/ci.yml` for build and verification on every push to `main`
-- `.github/workflows/deploy-manual.yml` for manual SSH deployment once the LXC target is ready
+### Deployment secrets
 
-## Deployment secrets
-
-Set these repository secrets when the LXC target is ready:
-
-- `DEPLOY_HOST`: MagicDNS name or IP of the LXC
-- `DEPLOY_USER`: SSH user on the LXC
-- `DEPLOY_SSH_KEY`: private key for deploy access
-- `DEPLOY_PORT`: optional, defaults to `22`
-- `DEPLOY_PATH`: optional, defaults to `/var/www/magnuslisleva-tn`
-- `DEPLOY_RELOAD_COMMAND`: optional command such as `sudo systemctl reload nginx`
+Set the following secret in your GitHub repository's **Secrets and variables > Actions**:
+- `FLY_API_TOKEN`: Your Fly.io access token.

@@ -1,73 +1,265 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { siteConfig } from "../site.config";
-
-const configured = siteConfig.mailchimpAction.length > 0;
 ---
 
 <BaseLayout title="Newsletter" description="Join the mailing list." fileLabel="Newsletter">
   <section class="content-area newsletter-page">
     <p>
-      Newsletter signup is intentionally separate from the rest of the archive. Add the Mailchimp
-      form action in `src/site.config.ts` and this page will submit directly to your list.
+      A botanical-technical mailing list for texts, creations, notes from the field, and digital work. No spam, just periodic reflections and updates straight to your inbox.
     </p>
 
     <div class="signup">
-      {
-        configured ? (
-          <form action={siteConfig.mailchimpAction} method="post" target="_blank" novalidate>
-            <label for="email" class="mono">Email</label>
-            <input id="email" type="email" name="EMAIL" required placeholder="you@example.com" />
-            <button type="submit">Join the list</button>
-          </form>
-        ) : (
-          <div class="placeholder">
-            <p class="mono">Mailchimp not configured yet.</p>
-            <p>Set `mailchimpAction` in `src/site.config.ts` to the exact Mailchimp form action URL.</p>
-          </div>
-        )
-      }
+      <form id="newsletter-form" novalidate>
+        <label for="email" class="mono">Email Address</label>
+        <div class="input-wrapper">
+          <input id="email" type="email" name="email" required placeholder="you@example.com" />
+          <button type="submit" id="submit-btn">
+            <span class="btn-text">Join the list</span>
+            <span class="btn-loader" id="btn-loader"></span>
+          </button>
+        </div>
+      </form>
+      
+      <!-- Success/Error states -->
+      <div id="form-message" class="form-message hidden" role="alert"></div>
     </div>
   </section>
 </BaseLayout>
 
+<script>
+  const form = document.getElementById("newsletter-form") as HTMLFormElement | null;
+  const messageEl = document.getElementById("form-message") as HTMLDivElement | null;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null;
+
+  if (form && messageEl && submitBtn) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const emailInput = form.querySelector("#email") as HTMLInputElement | null;
+      if (!emailInput) return;
+      
+      const email = emailInput.value.trim();
+      if (!email) {
+        showStatus("Please enter an email address.", "error");
+        return;
+      }
+
+      // Transition to loading state
+      form.classList.add("submitting");
+      submitBtn.disabled = true;
+      showStatus("Subscribing...", "loading");
+
+      try {
+        const formData = new FormData();
+        formData.append("email", email);
+
+        const response = await fetch("/api/subscribe", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showStatus(data.message || "Thank you! Please check your inbox to confirm your subscription.", "success");
+          emailInput.value = "";
+          form.classList.add("success-state");
+        } else {
+          showStatus(data.error || "Subscription failed. Please try again.", "error");
+        }
+      } catch (error) {
+        console.error("Subscription error:", error);
+        showStatus("An error occurred. Please verify your connection and try again.", "error");
+      } finally {
+        form.classList.remove("submitting");
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  function showStatus(message: string, type: "success" | "error" | "loading") {
+    if (!messageEl) return;
+    
+    // Clear classes
+    messageEl.className = "form-message";
+    messageEl.textContent = message;
+    
+    if (type === "success") {
+      messageEl.classList.add("success");
+    } else if (type === "error") {
+      messageEl.classList.add("error");
+    } else if (type === "loading") {
+      messageEl.classList.add("loading");
+    }
+    
+    messageEl.classList.remove("hidden");
+  }
+</script>
+
 <style>
   .signup {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--panel-2);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .signup:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 4px 12px rgba(39, 79, 61, 0.05);
   }
 
   form {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.8rem;
+    transition: opacity 0.3s ease;
+  }
+  
+  form.success-state {
+    opacity: 0.2;
+    pointer-events: none;
   }
 
   label {
     font-size: 0.78rem;
     text-transform: uppercase;
     color: var(--text-soft);
+    letter-spacing: 0.05em;
   }
 
-  input,
-  button {
-    width: 100%;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    font: inherit;
+  .input-wrapper {
+    display: flex;
+    gap: 0.5rem;
   }
 
   input {
+    flex-grow: 1;
     padding: 0.9rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     background: var(--panel);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
   }
 
   button {
-    padding: 0.9rem 1rem;
+    padding: 0.9rem 1.5rem;
     background: var(--accent);
     color: white;
+    border: none;
+    border-radius: var(--radius);
+    font: inherit;
+    font-weight: 500;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 9rem;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--accent-strong);
+    transform: translateY(-1px);
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .btn-loader {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .submitting #btn-loader {
+    display: inline-block;
+  }
+
+  /* Success/Error/Loading Message Styling */
+  .form-message {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-family: inherit;
+    line-height: 1.4;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .form-message.hidden {
+    display: none;
+  }
+
+  .form-message.success {
+    background-color: var(--accent-soft);
+    color: var(--accent-strong);
+    border: 1px solid var(--accent);
+  }
+
+  .form-message.error {
+    background-color: #fde8e8;
+    color: #9b1c1c;
+    border: 1px solid #f8b4b4;
+  }
+
+  .form-message.loading {
+    background-color: var(--panel);
+    color: var(--text-soft);
+    border: 1px dashed var(--line);
+  }
+
+  /* Micro-animations */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .input-wrapper {
+      flex-direction: column;
+    }
+    button {
+      width: 100%;
+    }
   }
 </style>

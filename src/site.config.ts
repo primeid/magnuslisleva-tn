@@ -1,8 +1,7 @@
 export const siteConfig = {
-  title: "MagnusLisleva.tn",
+  title: "magnuslislevatn.com",
   description:
     "A botanical-technical publication of texts, creations, notes from the field, and digital work.",
-  mailchimpAction: "",
   socialLinks: [
     {
       label: "LinkedIn",
