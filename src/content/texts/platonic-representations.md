@@ -7,9 +7,9 @@ featured: true
 tags:
   - ai
   - philosophy
-cover: "/media/platonic-representations/convergence-diagram.jpg"
+cover: "/media/platonic-representations/convergence-diagram.webp"
 gallery:
-  - "/media/platonic-representations/fractal-composition.png"
+  - "/media/platonic-representations/fractal-composition.webp"
 ---
 
 *Magnus Lislevatn*  

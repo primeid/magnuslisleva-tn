@@ -47,7 +47,7 @@ const entryLd = {
     {
       entry.data.cover && (
         <div class="media-frame cover">
-          <img src={entry.data.cover} alt="" loading="eager" />
+          <img src={entry.data.cover} alt="" width="1024" height="1024" loading="eager" />
         </div>
       )
     }
@@ -86,7 +86,9 @@ const entryLd = {
             <h2>Gallery</h2>
           </div>
           <div class="gallery">
-            {entry.data.gallery.map((image) => <img src={image} alt="" loading="lazy" />)}
+            {entry.data.gallery.map((image) => (
+              <img src={image} alt="" width="672" height="672" loading="lazy" />
+            ))}
           </div>
         </section>
       )

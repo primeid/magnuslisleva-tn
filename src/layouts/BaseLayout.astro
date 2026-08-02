@@ -96,7 +96,7 @@ const siteLd = {
             <button
               class="theme-toggle theme-cycle-btn"
               type="button"
-              aria-label="Cycle site theme"
+              aria-label="Dark — cycle site theme"
               data-theme-toggle
             >
               Dark
@@ -185,7 +185,10 @@ const siteLd = {
           : "dark";
 
       root.setAttribute("data-theme", initialTheme);
-      if (themeButton) themeButton.textContent = formatThemeLabel(initialTheme);
+      if (themeButton) {
+      themeButton.textContent = formatThemeLabel(initialTheme);
+      themeButton.setAttribute("aria-label", formatThemeLabel(initialTheme) + " — cycle site theme");
+    }
       updateClocks();
       window.setInterval(updateClocks, 1000);
       themeButton?.addEventListener("animationend", () => {
@@ -200,6 +203,7 @@ const siteLd = {
         root.setAttribute("data-theme", nextTheme);
         localStorage.setItem("theme", nextTheme);
         themeButton.textContent = formatThemeLabel(nextTheme);
+        themeButton.setAttribute("aria-label", formatThemeLabel(nextTheme) + " — cycle site theme");
         themeButton.classList.remove("theme-spin");
         void themeButton.offsetWidth;
         themeButton.classList.add("theme-spin");
