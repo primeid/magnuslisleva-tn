@@ -83,7 +83,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
       const updateMeta = () => {
         if (scoreNode) scoreNode.textContent = `Score ${score}`;
-        if (statusNode) statusNode.textContent = running ? "Running" : score > 0 ? "Game over" : "Press space";
+        if (statusNode) statusNode.textContent = running ? "Running" : score > 0 ? "Game over" : "Tap to start";
       };
 
       const reset = () => {
@@ -159,6 +159,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         }
       }, { passive: false });
 
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
       canvas.addEventListener("touchcancel", () => {
         touchStartX = null;
         touchStartY = null;
@@ -181,6 +185,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   .game-shell {
     width: min(100%, 28rem);
     padding: 0.9rem;
+    touch-action: manipulation;
   }
 
   .snake-board {
