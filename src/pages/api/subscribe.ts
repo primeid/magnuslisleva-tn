@@ -4,9 +4,10 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const data = await request.formData();
-    const email = data.get("email");
-    const honeypot = data.get("b_honeypot");
+    // ponytail: JSON i stedet for formData — Fly-proxyen blokkerer form-content-type-POSTs
+    const data = await request.json();
+    const email = data.email;
+    const honeypot = data.b_honeypot;
 
     // Honeypot check (prevent automated bot spam)
     if (honeypot && typeof honeypot === "string" && honeypot.length > 0) {
