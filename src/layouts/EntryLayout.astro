@@ -32,6 +32,7 @@ const entryLd = {
   fileLabel={entry.data.title}
   jsonLd={JSON.stringify(entryLd)}
   ogImage={entry.data.cover ? new URL(entry.data.cover, siteUrl).toString() : undefined}
+  preloadSrcset={entry.data.cover ? `${new URL(entry.data.cover.replace(/\.webp$/, "-480.webp"), siteUrl).toString()} 480w, ${new URL(entry.data.cover, siteUrl).toString()} 800w` : undefined}
 >
   <article class="entry-page content-area">
     <div class="entry-meta mono">
@@ -47,7 +48,15 @@ const entryLd = {
     {
       entry.data.cover && (
         <div class="media-frame cover">
-          <img src={entry.data.cover} alt="" width="800" height="800" loading="eager" />
+          <img
+            src={entry.data.cover.replace(/\.webp$/, "-480.webp")}
+            srcset={`${entry.data.cover.replace(/\.webp$/, "-480.webp")} 480w, ${entry.data.cover} 800w`}
+            sizes="(max-width: 720px) 480px, 800px"
+            alt=""
+            width="800"
+            height="800"
+            loading="eager"
+          />
         </div>
       )
     }

@@ -13,9 +13,11 @@ interface Props {
   ogImage?: string;
   /** Use verbatim as <title> (front page has its own branded title) */
   pageTitle?: string;
+  /** Responsive srcset for the LCP image preload (entry covers) */
+  preloadSrcset?: string;
 }
 
-const { title, description = siteConfig.description, fileLabel, jsonLd, ogImage, pageTitle } = Astro.props;
+const { title, description = siteConfig.description, fileLabel, jsonLd, ogImage, pageTitle, preloadSrcset } = Astro.props;
 const pageTitleFinal = pageTitle ?? (title ? `${title} | ${siteConfig.title}` : siteConfig.title);
 const pathname = Astro.url.pathname;
 const label = fileLabel ?? title ?? "README";
@@ -73,7 +75,16 @@ const siteLd = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage ?? defaultOgImage} />
 
-    {jsonLd && ogImage && <link rel="preload" as="image" href={ogImage} fetchpriority="high" />}
+    {jsonLd && ogImage && (
+      <link
+        rel="preload"
+        as="image"
+        imagesrcset={preloadSrcset ?? ogImage}
+        imagesizes={preloadSrcset ? "(max-width: 720px) 480px, 800px" : undefined}
+        href={preloadSrcset ? undefined : ogImage}
+        fetchpriority="high"
+      />
+    )}
     {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
   </head>
