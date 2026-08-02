@@ -97,22 +97,35 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         keys[e.key] = true;
         if (e.key === " ") {
           e.preventDefault();
-          if (!running) { running = true; updateMeta(); }
+          if (!running) {
+            if (lives <= 0) initState();
+            running = true;
+            updateMeta();
+          }
           else if (!launched) { launched = true; }
         }
       });
       window.addEventListener("keyup", (e) => { keys[e.key] = false; });
+      window.addEventListener("blur", () => { for (const k of Object.keys(keys)) delete keys[k]; });
 
       let touchActive = false;
       let touchX = 0;
 
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        if (!running) { running = true; updateMeta(); return; }
-        if (!launched) { launched = true; }
+        // ponytail: ingen tidlig-return — samme finger som starter skal også styre,
+        // og game over skal starte nytt spill
+        if (!running) {
+          if (lives <= 0) initState();
+          running = true;
+          updateMeta();
+        } else if (!launched) {
+          launched = true;
+        }
         touchActive = true;
         const rect = canvas.getBoundingClientRect();
         touchX = (e.touches[0].clientX - rect.left) / rect.width * W;
+        paddle.x = Math.max(0, Math.min(W - PADDLE_W, touchX - PADDLE_W / 2));
       }, { passive: false });
 
       canvas.addEventListener("touchmove", (e) => {
@@ -127,6 +140,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         e.preventDefault();
         touchActive = false;
       }, { passive: false });
+
+      canvas.addEventListener("touchcancel", () => {
+        touchActive = false;
+      });
 
       const updateMeta = () => {
         if (scoreNode) scoreNode.textContent = `Score ${score}`;

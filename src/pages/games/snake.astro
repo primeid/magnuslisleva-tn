@@ -132,8 +132,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         if (e.key === " ") { e.preventDefault(); reset(); }
       });
 
-      let touchStartX = 0;
-      let touchStartY = 0;
+      let touchStartX = null;
+      let touchStartY = null;
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
         if (!running) { reset(); return; }
@@ -144,9 +144,13 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
       canvas.addEventListener("touchend", (e) => {
         e.preventDefault();
+        // ponytail: touchcancel kan ha invalidert startpunktet — ignorér da
+        if (touchStartX === null || touchStartY === null) return;
         const t = e.changedTouches[0];
         const dx = t.clientX - touchStartX;
         const dy = t.clientY - touchStartY;
+        touchStartX = null;
+        touchStartY = null;
         if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
         if (Math.abs(dx) > Math.abs(dy)) {
           setDirection(dx > 0 ? 1 : -1, 0);
@@ -154,6 +158,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
           setDirection(0, dy > 0 ? 1 : -1);
         }
       }, { passive: false });
+
+      canvas.addEventListener("touchcancel", () => {
+        touchStartX = null;
+        touchStartY = null;
+      });
 
       updateMeta();
       paint();

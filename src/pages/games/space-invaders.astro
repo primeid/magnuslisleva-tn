@@ -101,34 +101,57 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         }
       });
       window.addEventListener("keyup", (e) => { keys[e.key] = false; });
+      window.addEventListener("blur", () => { for (const k of Object.keys(keys)) delete keys[k]; });
 
       let touchLeft = false;
       let touchRight = false;
       let touchShoot = false;
 
-      canvas.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        if (!running && !gameOver) { running = true; updateMeta(); return; }
-        if (gameOver) { initState(); running = true; updateMeta(); return; }
-        for (const t of e.touches) {
-          const rect = canvas.getBoundingClientRect();
-          const tx = (t.clientX - rect.left) / rect.width;
+      // ponytail: spor hver finger for seg (identifier -> sone-x). En finger opp
+      // skal ikke nullstille de andre, og touchcancel må rydde opp slik at
+      // spilleren aldri sitter fast i bevegelse
+      const touchPos = new Map();
+
+      const zoneOf = (t) => {
+        const rect = canvas.getBoundingClientRect();
+        return (t.clientX - rect.left) / rect.width;
+      };
+
+      const recomputeTouch = () => {
+        touchLeft = false;
+        touchRight = false;
+        touchShoot = false;
+        for (const tx of touchPos.values()) {
           if (tx < 0.3) touchLeft = true;
           else if (tx > 0.7) touchRight = true;
           else touchShoot = true;
         }
-      }, { passive: false });
+      };
 
-      canvas.addEventListener("touchend", (e) => {
+      canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        touchLeft = false;
-        touchRight = false;
-        touchShoot = false;
+        if (!running && !gameOver) { running = true; updateMeta(); return; }
+        if (gameOver) { initState(); running = true; updateMeta(); return; }
+        for (const t of e.changedTouches) touchPos.set(t.identifier, zoneOf(t));
+        recomputeTouch();
       }, { passive: false });
 
       canvas.addEventListener("touchmove", (e) => {
         e.preventDefault();
+        for (const t of e.changedTouches) touchPos.set(t.identifier, zoneOf(t));
+        recomputeTouch();
       }, { passive: false });
+
+      canvas.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        for (const t of e.changedTouches) touchPos.delete(t.identifier);
+        recomputeTouch();
+      }, { passive: false });
+
+      canvas.addEventListener("touchcancel", (e) => {
+        for (const t of e.changedTouches) touchPos.delete(t.identifier);
+        recomputeTouch();
+      });
 
       const updateMeta = () => {
         if (scoreNode) scoreNode.textContent = `Score ${score}`;
