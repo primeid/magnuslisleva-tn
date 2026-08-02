@@ -2,3 +2,9 @@ node_modules/
 dist/
 .astro/
 temp spm.txt
+.playwright-mcp/
+.antigravitycli/
+.smallcode/
+.memory/
+blog temp data/
+robin-reference.html

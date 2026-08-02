@@ -7,12 +7,38 @@ interface Props {
   title?: string;
   description?: string;
   fileLabel?: string;
+  /** Optional JSON-LD block (e.g. Article schema for entry pages) */
+  jsonLd?: string;
+  /** Absolute URL override for og:image (defaults to the profile portrait) */
+  ogImage?: string;
 }
 
-const { title, description = siteConfig.description, fileLabel } = Astro.props;
+const { title, description = siteConfig.description, fileLabel, jsonLd, ogImage } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
 const pathname = Astro.url.pathname;
 const label = fileLabel ?? title ?? "README";
+const siteUrl = Astro.site ?? new URL("https://magnuslislevatn.com");
+const canonical = new URL(pathname, siteUrl).toString();
+const defaultOgImage = new URL("/media/about/magnus-profile.webp", siteUrl).toString();
+
+const siteLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: siteConfig.title,
+      url: siteUrl.toString(),
+      description: siteConfig.description,
+    },
+    {
+      "@type": "Person",
+      name: "Magnus Lislevatn",
+      url: siteUrl.toString(),
+      description: siteConfig.description,
+      sameAs: siteConfig.socialLinks.map((l) => l.href),
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -21,10 +47,30 @@ const label = fileLabel ?? title ?? "README";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="author" content="Magnus Lislevatn" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" href="/earth-mark.svg" type="image/svg+xml" />
     <link rel="shortcut icon" href="/earth-mark.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/earth-mark.svg" />
     <title>{pageTitle}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={jsonLd ? "article" : "website"} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage ?? defaultOgImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage ?? defaultOgImage} />
+
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
+    <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
   </head>
   <body>
     <div class="app-shell">

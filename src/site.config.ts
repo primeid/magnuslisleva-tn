@@ -19,6 +19,14 @@ export const siteConfig = {
       label: "SoundCloud",
       href: "https://soundcloud.com/magnuslislevatn",
     },
+    {
+      label: "Spotify",
+      href: "https://open.spotify.com/artist/7sXarElnQwciBhUXZhm52H",
+    },
+    {
+      label: "GitHub",
+      href: "https://github.com/primeid",
+    },
   ],
   nav: [
     { label: "About", href: "/" },

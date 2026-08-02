@@ -1,0 +1,15 @@
+# magnuslislevatn.com
+
+> A botanical-technical publication of texts, creations, notes from the field, and digital work by Magnus Lislevatn. No spam — periodic reflections and updates.
+
+## magnuslislevatn.com
+
+- [About](https://magnuslislevatn.com/): Magnus Lislevatn — botanical-technical publication of texts, creations, notes from the field, and digital work
+- [Texts](https://magnuslislevatn.com/texts/): Collection of published texts
+  - [Stop Balancing, Start Curating](https://magnuslislevatn.com/texts/curating-your-life/): Gail Golden's Curating Your Life argues that work-life balance is a seductive myth. The real skill is something harder and more honest: learning to choose.
+  - [On the Ontological Argument](https://magnuslislevatn.com/texts/ontological-argument/): A philosophical inquiry into the ontological argument, infinity, and whether conceptual necessity can grasp reality.
+  - [Convergence Toward Platonic Representations in Human and Machine](https://magnuslislevatn.com/texts/platonic-representations/): An argument that convergent representations in AI and human cognition point toward objective structures in reality and an empirically grounded aesthetic realism.
+  - [Utilitarianism and the Debate on Partiality](https://magnuslislevatn.com/texts/utilitarianism-and-partiality/): An examination of utilitarian impartiality, demandingness, and the tension between moral theory and human attachment.
+- [Creations](https://magnuslislevatn.com/creations/): Digital creations and projects
+- [Games](https://magnuslislevatn.com/games/): Playable browser games — snake, breakout, space invaders, tamagotchi
+- [Newsletter](https://magnuslislevatn.com/newsletter/): Mailing list signup — periodic reflections and updates straight to your inbox
