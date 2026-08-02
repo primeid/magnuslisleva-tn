@@ -41,8 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: email.trim(),
-        check_spam: true,
+        email_address: email.trim(),
         metadata: {
           referrer: "website_signup_form"
         }
@@ -62,6 +61,10 @@ export const POST: APIRoute = async ({ request }) => {
         errorMessage = Object.entries(responseData)
           .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(", ") : val}`)
           .join(" ");
+      }
+      // ponytail: detail kan være array av objekter (f.eks. 422 valideringsfeil)
+      if (typeof errorMessage !== "string") {
+        errorMessage = JSON.stringify(errorMessage);
       }
 
       // Handle duplicate subscription gracefully
