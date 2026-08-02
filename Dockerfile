@@ -13,16 +13,20 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Runner stage
-FROM base AS runner
+# Runner stage: node (API) + caddy (static, komprimering, cache)
+FROM node:22-alpine AS runner
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=80
+ENV PORT=3000
 
-# Copy node_modules and built dist folder
+RUN apk add --no-cache caddy
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
-CMD ["node", "dist/server/entry.mjs"]
+CMD ["/entrypoint.sh"]
