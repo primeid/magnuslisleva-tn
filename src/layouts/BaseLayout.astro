@@ -73,7 +73,7 @@ const siteLd = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage ?? defaultOgImage} />
 
-    {jsonLd && ogImage && <link rel="preload" as="image" href={ogImage} />}
+    {jsonLd && ogImage && <link rel="preload" as="image" href={ogImage} fetchpriority="high" />}
     {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
   </head>
