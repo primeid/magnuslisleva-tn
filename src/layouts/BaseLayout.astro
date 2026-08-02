@@ -1,6 +1,8 @@
 ---
 import Navigator from "../components/Navigator.astro";
 import "../styles/global.css";
+import newsreaderLatin from "@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2";
+import ibmPlexLatin from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2";
 import { siteConfig } from "../site.config";
 
 interface Props {
@@ -55,6 +57,8 @@ const siteLd = {
     <link rel="icon" href="/earth-mark.svg" type="image/svg+xml" />
     <link rel="shortcut icon" href="/earth-mark.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/earth-mark.svg" />
+    <link rel="preload" as="font" type="font/woff2" href={newsreaderLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={ibmPlexLatin} crossorigin />
     <title>{pageTitleFinal}</title>
 
     <!-- Open Graph -->
