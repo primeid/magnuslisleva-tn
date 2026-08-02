@@ -15,6 +15,7 @@ RUN npm run build
 
 # Runner stage: node (API) + caddy (static, komprimering, cache)
 FROM node:22-alpine AS runner
+WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
