@@ -73,6 +73,7 @@ const siteLd = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage ?? defaultOgImage} />
 
+    {jsonLd && ogImage && <link rel="preload" as="image" href={ogImage} />}
     {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
   </head>
@@ -133,14 +134,41 @@ const siteLd = {
       const root = document.documentElement;
       const storedTheme = localStorage.getItem("theme");
       const themeButton = document.querySelector("[data-theme-toggle]");
+      const themeOrder = ["dark", "light", "punk"];
+      const formatThemeLabel = (theme) =>
+        theme ? theme.charAt(0).toUpperCase() + theme.slice(1) : "Theme";
+      const initialTheme =
+        storedTheme === "light" || storedTheme === "dark" || storedTheme === "punk"
+          ? storedTheme
+          : "dark";
+
+      root.setAttribute("data-theme", initialTheme);
+      if (themeButton) {
+        themeButton.textContent = formatThemeLabel(initialTheme);
+        themeButton.setAttribute("aria-label", formatThemeLabel(initialTheme) + " — cycle site theme");
+      }
+      themeButton?.addEventListener("animationend", () => {
+        themeButton.classList.remove("theme-spin");
+      });
+      themeButton?.addEventListener("click", () => {
+        const currentTheme = root.getAttribute("data-theme");
+        const nextTheme = currentTheme
+          ? themeOrder[(themeOrder.indexOf(currentTheme) + 1) % themeOrder.length]
+          : "dark";
+        root.setAttribute("data-theme", nextTheme);
+        localStorage.setItem("theme", nextTheme);
+        themeButton.textContent = formatThemeLabel(nextTheme);
+        themeButton.setAttribute("aria-label", formatThemeLabel(nextTheme) + " — cycle site theme");
+        themeButton.classList.remove("theme-spin");
+        void themeButton.offsetWidth;
+        themeButton.classList.add("theme-spin");
+      });
+    </script>
+
+    <script>
       const utcDateNode = document.querySelector("[data-clock-utc-date]");
       const utcTimeNode = document.querySelector("[data-clock-utc-time]");
       const moonTimeNode = document.querySelector("[data-clock-moon]");
-      const themeOrder = ["dark", "light", "punk"];
-      const lunarEpochMs = Date.UTC(1970, 0, 1, 0, 0, 0);
-      const lunarDriftPerEarthDayMs = 58.7 / 1000;
-      const formatThemeLabel = (theme) =>
-        theme ? theme.charAt(0).toUpperCase() + theme.slice(1) : "Theme";
       const normalizePath = (value) => {
         if (!value) return "/";
         if (value === "/") return "/";
@@ -172,6 +200,8 @@ const siteLd = {
         if (utcTimeNode) utcTimeNode.textContent = `UTC ${utc.time}`;
 
         if (moonTimeNode) {
+          const lunarEpochMs = Date.UTC(1970, 0, 1, 0, 0, 0);
+          const lunarDriftPerEarthDayMs = 58.7 / 1000;
           const elapsedDays = (now.getTime() - lunarEpochMs) / 86400000;
           const lunarOffsetMs = elapsedDays * lunarDriftPerEarthDayMs;
           const moonDate = new Date(now.getTime() + lunarOffsetMs);
@@ -179,35 +209,8 @@ const siteLd = {
           moonTimeNode.textContent = `MTC ${moon.time}`;
         }
       };
-      const initialTheme =
-        storedTheme === "light" || storedTheme === "dark" || storedTheme === "punk"
-          ? storedTheme
-          : "dark";
-
-      root.setAttribute("data-theme", initialTheme);
-      if (themeButton) {
-      themeButton.textContent = formatThemeLabel(initialTheme);
-      themeButton.setAttribute("aria-label", formatThemeLabel(initialTheme) + " — cycle site theme");
-    }
       updateClocks();
       window.setInterval(updateClocks, 1000);
-      themeButton?.addEventListener("animationend", () => {
-        themeButton.classList.remove("theme-spin");
-      });
-
-      themeButton?.addEventListener("click", () => {
-        const currentTheme = root.getAttribute("data-theme");
-        const nextTheme = currentTheme
-          ? themeOrder[(themeOrder.indexOf(currentTheme) + 1) % themeOrder.length]
-          : "dark";
-        root.setAttribute("data-theme", nextTheme);
-        localStorage.setItem("theme", nextTheme);
-        themeButton.textContent = formatThemeLabel(nextTheme);
-        themeButton.setAttribute("aria-label", formatThemeLabel(nextTheme) + " — cycle site theme");
-        themeButton.classList.remove("theme-spin");
-        void themeButton.offsetWidth;
-        themeButton.classList.add("theme-spin");
-      });
 
       const mobileMenuBtn = document.querySelector("[data-mobile-menu-toggle]");
       const navigatorShell = document.querySelector(".navigator-shell");
